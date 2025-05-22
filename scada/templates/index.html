@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Runway Light Control</title>
+</head>
+<body>
+    <h1>SCADA System - Airport Runway Lights</h1>
+    <form method="POST" action="/control">
+        <label for="runway">Runway:</label>
+        <select name="runway" id="runway">
+            <option value="RWY_1">RWY_1</option>
+            <option value="RWY_2">RWY_2</option>
+        </select><br><br>
+        <label for="action">Action:</label>
+        <select name="action" id="action">
+            <option value="ON">Turn ON</option>
+            <option value="OFF">Turn OFF</option>
+        </select><br><br>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
