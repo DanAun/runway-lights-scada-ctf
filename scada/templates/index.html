@@ -1,22 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Runway Light Control</title>
+    <title>Airport SCADA Panel</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function toggleLights(action) {
+            fetch('/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `action=${action}`
+            }).then(res => res.json()).then(data => {
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    alert(data.message || 'Error');
+                }
+            });
+        }
+    </script>
 </head>
 <body>
-    <h1>SCADA System - Airport Runway Lights</h1>
-    <form method="POST" action="/control">
-        <label for="runway">Runway:</label>
-        <select name="runway" id="runway">
-            <option value="RWY_1">RWY_1</option>
-            <option value="RWY_2">RWY_2</option>
-        </select><br><br>
-        <label for="action">Action:</label>
-        <select name="action" id="action">
-            <option value="ON">Turn ON</option>
-            <option value="OFF">Turn OFF</option>
-        </select><br><br>
-        <input type="submit" value="Submit">
-    </form>
+    <div class="panel">
+        <h1>Runway Light Control</h1>
+        <p>Status: <strong class="status">{{ status }}</strong></p>
+        <button onclick="toggleLights('ON')">Turn ON</button>
+        <button onclick="toggleLights('OFF')">Turn OFF</button>
+        <br><br>
+        <a href="/logout">Logout</a>
+    </div>
 </body>
 </html>

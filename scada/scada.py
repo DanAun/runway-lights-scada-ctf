@@ -1,40 +1,67 @@
-# ICS Client Webserver using Modbus TCP to control airport runway lights
-
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from pymodbus.client import ModbusTcpClient
+from ics.ics import ICS_SERVER_PORT
+import os
 
 app = Flask(__name__)
+app.secret_key = os.urandom(24)  # Use a fixed key in production
 
-# Replace with actual server IP of the ICS server
-ICS_SERVER_IP = '127.0.0.1'  # Change to your Modbus server's IP
-ICS_SERVER_PORT = 502  # Modbus port
+# Dummy credentials
+USERNAME = "admin"
+PASSWORD = "password"
+
+ICS_SERVER_IP = '127.0.0.1'
+COIL_ADDRESS = 0  # Single runway light coil address
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def home():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
 
-@app.route('/control', methods=['POST'])
-def control():
-    runway = request.form['runway']
-    action = request.form['action']
+    # Read current runway light status
+    client = ModbusTcpClient(ICS_SERVER_IP, port=ICS_SERVER_PORT)
+    client.connect()
+    result = client.read_coils(COIL_ADDRESS, count=1)
+    client.close()
 
-    # Map runway to Modbus coil address
-    coil_map = {'RWY_1': 0, 'RWY_2': 1}
-    coil_address = coil_map.get(runway)
-    coil_state = True if action == 'ON' else False
+    if result.isError():
+        status = "Error"
+    else:
+        status = "ON" if result.bits[0] else "OFF"
 
-    try:
-        client = ModbusTcpClient(ICS_SERVER_IP, port=ICS_SERVER_PORT)
-        client.connect()
-        result = client.write_coil(coil_address, coil_state)
-        client.close()
-        if result.isError():
-            raise Exception("Modbus write error")
-    except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+    return render_template('index.html', status=status)
 
-    return jsonify({'status': 'success', 'response': f'{runway} lights set to {action}'})
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if request.form['username'] == USERNAME and request.form['password'] == PASSWORD:
+            session['logged_in'] = True
+            return redirect(url_for('home'))
+        else:
+            return render_template('login.html', error="Invalid credentials.")
+    return render_template('login.html')
 
-# Start the SCADA Web Server
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+@app.route('/toggle', methods=['POST'])
+def toggle():
+    if not session.get('logged_in'):
+        return jsonify({'status': 'unauthorized'}), 401
+
+    action = request.form.get('action')
+    state = True if action == "ON" else False
+
+    client = ModbusTcpClient(ICS_SERVER_IP, port=ICS_SERVER_PORT)
+    client.connect()
+    result = client.write_coil(COIL_ADDRESS, state)
+    client.close()
+
+    if result.isError():
+        return jsonify({'status': 'error', 'message': 'Modbus write failed'})
+    return jsonify({'status': 'success', 'message': f'Runway lights turned {action}'})
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
