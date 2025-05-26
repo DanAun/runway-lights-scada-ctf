@@ -24,6 +24,12 @@ button {
     color: #000;
     cursor: pointer;
 }
+.status-off {
+      color: red;
+    }
+.status-on {
+      color: green;
+    }
 .error {
     color: red;
 }

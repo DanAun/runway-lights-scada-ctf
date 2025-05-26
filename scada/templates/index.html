@@ -22,7 +22,12 @@
 <body>
     <div class="panel">
         <h1>Runway Light Control</h1>
-        <p>Status: <strong class="status">{{ status }}</strong></p>
+        <p>Status: 
+        {% if status == "ON" %}
+            <strong class="status-on">{{ status }}</strong></p>
+        {% else %}
+            <strong class="status-off">{{ status }}</strong></p>
+        {% endif %}
         <button onclick="toggleLights('ON')">Turn ON</button>
         <button onclick="toggleLights('OFF')">Turn OFF</button>
         <br><br>
