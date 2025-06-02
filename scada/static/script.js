@@ -5,7 +5,7 @@ function toggleLights(action) {
         body: `action=${action}`
     }).then(res => res.json()).then(data => {
         if (data.status === 'success') {
-            location.reload();
+            fetchStatus();
         } else {
             alert(data.message || 'Error');
         }
