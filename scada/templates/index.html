@@ -3,30 +3,16 @@
 <head>
     <title>Airport SCADA Panel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        function toggleLights(action) {
-            fetch('/toggle', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: `action=${action}`
-            }).then(res => res.json()).then(data => {
-                if (data.status === 'success') {
-                    location.reload();
-                } else {
-                    alert(data.message || 'Error');
-                }
-            });
-        }
-    </script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
     <div class="panel">
         <h1>Runway Light Control</h1>
         <p>Status: 
         {% if status == "ON" %}
-            <strong class="status-on">{{ status }}</strong></p>
+            <strong id="runway_lights_state" class="status-on">{{ status }}</strong></p>
         {% else %}
-            <strong class="status-off">{{ status }}</strong></p>
+            <strong id="runway_lights_state" class="status-off">{{ status }}</strong></p>
         {% endif %}
         <button onclick="toggleLights('ON')">Turn ON</button>
         <button onclick="toggleLights('OFF')">Turn OFF</button>
