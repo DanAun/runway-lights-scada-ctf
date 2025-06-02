@@ -1,12 +1,16 @@
+import pymodbus.exceptions
 from pymodbus.client import ModbusTcpClient
 import time
 
-def send_modbus_request():
+REQUEST_FREQUENCY = 1  # Frequency of requests in seconds
+RETRY_DELAY = 5  # Delay in seconds before retrying connection
+
+def loop_modbus_request():
     # Create a Modbus TCP client
     client = ModbusTcpClient('localhost', port=5020)
     
-    try:
-        while True:
+    while True:
+        try:
             # Connect to the server
             client.connect()
             
@@ -14,12 +18,17 @@ def send_modbus_request():
             client.write_coil(0, False)
             
             # Small delay to prevent overwhelming the server
-            time.sleep(1)
-            
-    except KeyboardInterrupt:
-        print("Script stopped by user")
-    finally:
-        client.close()
+            time.sleep(REQUEST_FREQUENCY)
+        
+        except pymodbus.exceptions.ConnectionException as e:
+            print(f"Connection error: {e}")
+            print("Retrying in %d seconds..." % RETRY_DELAY)
+            time.sleep(RETRY_DELAY)
+        except KeyboardInterrupt:
+            print("Script stopped by user")
+            exit(0)
+        finally:
+            client.close()
 
 if __name__ == "__main__":
-    send_modbus_request()
+    loop_modbus_request()
