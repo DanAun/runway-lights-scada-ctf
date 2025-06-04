@@ -5,6 +5,8 @@ import logging
 from threading import Thread
 import time
 
+from govee_control import light_up_segment, reset_lights
+
 # --- Constants ---
 ICS_SERVER_PORT = 5020  # Port 502 requires root, so we use 5020 unless privileged access is okay
 COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
@@ -29,17 +31,19 @@ def send_api_call(runway_state: bool):
     Simulates sending the new state of the runway light to an external API.
     """
     log.info(f"[API CALL] Runway light is now {'ON' if runway_state else 'OFF'}")
-    # Example: requests.post("http://api.example.com/runway", json={"state": runway_state})
+    light_up_segment(4)
     return True
 
 # --- Monitor Thread ---
 def monitor_and_control():
     previous_state = None
+    reset_lights()
     while True:
         current_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
         if current_state != previous_state:
-            log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
-            send_api_call(current_state)
+            if current_state:
+                log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
+                send_api_call(current_state)
             previous_state = current_state
         time.sleep(0.5)
 

@@ -75,6 +75,8 @@ def toggle():
 
 @app.route('/status', methods=['GET'])
 def get_status():
+    if not session.get('logged_in'):
+        return jsonify({'status': 'unauthorized'}), 401
     result = get_light_status()
     if result is None:
         return jsonify({'error': 'Modbus read failed'}), 500
