@@ -8,8 +8,9 @@ import time
 from govee_control import light_up_segment, reset_lights
 
 # --- Constants ---
-ICS_SERVER_PORT = 5020  # Port 502 requires root, so we use 5020 unless privileged access is okay
+ICS_SERVER_PORT = 5020  # Use 502 in production so wireshark autodetects protocol
 COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
+SOLVE_DELAY = 3 # Number of seconds light needs to be on before considering the challenge solved
 
 # --- Logging Setup ---
 logging.basicConfig()
@@ -25,13 +26,19 @@ store = ModbusSlaveContext(
 )
 context = ModbusServerContext(slaves=store, single=True)
 
-# --- API Simulation ---
-def send_api_call(runway_state: bool):
+def is_challenge_solved():
     """
-    Simulates sending the new state of the runway light to an external API.
+    Checks if the challenge has been solved. I.E. the state of runway stays on for x seconds.
     """
-    log.info(f"[API CALL] Runway light is now {'ON' if runway_state else 'OFF'}")
-    light_up_segment(4)
+    start_time = time.time()
+    while True:
+        is_current_state_on = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
+        if not is_current_state_on:
+            return False
+        # Check if the elapsed time has reached SOLVE_DELAY
+        elapsed_time = time.time() - start_time
+        if elapsed_time >= SOLVE_DELAY:
+            break  # Exit the loop if the delay has passed
     return True
 
 # --- Monitor Thread ---
@@ -41,9 +48,9 @@ def monitor_and_control():
     while True:
         current_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
         if current_state != previous_state:
-            if current_state:
-                log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
-                send_api_call(current_state)
+            log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
+            if is_challenge_solved():
+                light_up_segment(3)
             previous_state = current_state
         time.sleep(0.5)
 
