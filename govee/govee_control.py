@@ -26,6 +26,7 @@ def activate_team_light(team_num):
     Activates the given team_num's corresponding LED segments by calling light_up_segments with correct device and segment
     team_num should be from 1-40
     """
+
     if not 0 < team_num < 40:
         raise ValueError("team_num should be in range 1-40")
     team_num -= 1 # Convert from range 1-40 to 0-39
@@ -74,7 +75,18 @@ def light_up_segments(strip_num, segment_id, color=0xFFFFFF):
     except Exception as e:
         log.error(f"Error lighting up segment: {e}")
 
+def reset_all_strips():
+    for i in range(1,5):
+        reset_strip(i)
+        
 def reset_strip(strip_num):
+    """
+    Reset the strip corresponding to strip_num.
+    This means we turn off all segments and set brighntess to max to ready the lights for use.
+    """
+
+    if not 0 < strip_num < 5:
+        raise ValueError("strip_num should be 1-4")
     device_id = get_device_id(strip_num)
     # Set all segments to no light
     no_light_payload = {
