@@ -12,7 +12,7 @@ HEADERS = {
 SKU = os.getenv("GOVEE_SKU")
 DEVICE = os.getenv("GOVEE_DEVICE")
 
-def light_up_segment(segment_id, color=0x00ca00):
+def light_up_segment(segment_id, color=0xFFFFFF):
     print(f"Lighting up segment {segment_id}")
 
     rgb_payload = {
