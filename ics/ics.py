@@ -64,10 +64,9 @@ def monitor_and_control():
 
 # --- Device Identity (for visibility in tools like Wireshark) ---
 identity = ModbusDeviceIdentification()
-identity.VendorName = "SimulatedICS"
+identity.VendorName = "Euromaximus"
 identity.ProductCode = "SCADA"
-identity.VendorUrl = "http://example.com"
-identity.ProductName = "Runway Light ICS"
+identity.ProductName = "EuroBay International Airport - Runwaylight System"
 identity.ModelName = "RunwayICS v3"
 identity.MajorMinorRevision = "3.0"
 
