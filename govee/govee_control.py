@@ -21,6 +21,20 @@ def get_device_id(strip_num : int):
     """
     return os.getenv("GOVEE_DEVICE_" + str(strip_num))
 
+def activate_team_light(team_num):
+    """
+    Activates the given team_num's corresponding LED segments by calling light_up_segments with correct device and segment
+    team_num should be from 1-40
+    """
+    if not 0 < team_num < 40:
+        raise ValueError("team_num should be in range 1-40")
+    team_num -= 1 # Convert from range 1-40 to 0-39
+    strip = team_num // 10 + 1
+    segment = team_num % 10
+     
+    light_up_segments(strip, segment)
+
+
 def light_up_segments(strip_num, segment_id, color=0xFFFFFF):
     log.debug(f"Lighting up segment {segment_id}")
     device_id = get_device_id(strip_num)

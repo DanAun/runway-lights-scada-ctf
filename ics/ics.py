@@ -16,7 +16,7 @@ from pymodbus.device import ModbusDeviceIdentification
 from threading import Thread
 import time
 
-from govee.govee_control import light_up_segments, reset_strip
+from govee.govee_control import light_up_segments, reset_strip, activate_team_light
 
 
 
@@ -58,7 +58,7 @@ def monitor_and_control():
         if current_state != previous_state:
             log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
             if is_challenge_solved():
-                light_up_segments(1, 3)
+                activate_team_light(11)
             previous_state = current_state
         time.sleep(0.5)
 
