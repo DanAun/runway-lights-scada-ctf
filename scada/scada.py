@@ -1,10 +1,13 @@
 import logging
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 from pymodbus.client import ModbusTcpClient
 from ics.ics import ICS_SERVER_PORT
 import os
+
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.WARN)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # Use a fixed key in production
@@ -60,7 +63,7 @@ def logout():
 
 # Initialize the Limiter
 limiter = Limiter(
-    get_remote_address,  # Function to get the client's IP address
+    key_func=lambda: "global",  # Use a fixed key for all requests
     app=app,
     default_limits=[]  # No default limits, we will set specific limits on routes
 )
@@ -68,8 +71,9 @@ limiter = Limiter(
 @app.route('/toggle', methods=['POST'])
 @limiter.limit("1 per second")  # Rate limit for this specific route
 def toggle():
-    if not session.get('logged_in'):
-        return jsonify({'status': 'unauthorized'}), 401
+    # -------------  !!!!!!!!!!!!!IMPORTANT REMOVE UNCOMMENT THE SESSIONS CHECK!!!!!!!!!!!!
+    #if not session.get('logged_in'):
+     #   return jsonify({'status': 'unauthorized'}), 401
 
     action = request.form.get('action')
     state = True if action == "ON" else False

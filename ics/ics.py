@@ -1,21 +1,29 @@
+import logging
+
+# --- Logging Setup ---
+logging.basicConfig(
+    level=logging.INFO,  # Set the logging level
+    format='%(asctime)s - [ICS] - %(levelname)s: %(message)s',  # Custom format
+    datefmt='%H:%M:%S'  # Display only hour, minute, and second
+)
+log = logging.getLogger("ICS")  # Create a custom logger
+log_modbus = logging.getLogger("pymodbus")
+log_modbus.setLevel(logging.WARN)
+
 from pymodbus.server import StartTcpServer
 from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
 from pymodbus.device import ModbusDeviceIdentification
-import logging
 from threading import Thread
 import time
 
-from govee_control import light_up_segment, reset_lights
+from govee.govee_control import light_up_segments, reset_strip
+
+
 
 # --- Constants ---
 ICS_SERVER_PORT = 5020  # Use 502 in production so wireshark autodetects protocol
 COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
 SOLVE_DELAY = 3 # Number of seconds light needs to be on before considering the challenge solved
-
-# --- Logging Setup ---
-logging.basicConfig()
-log = logging.getLogger()
-log.setLevel(logging.INFO)
 
 # --- Modbus Data Store ---
 store = ModbusSlaveContext(
@@ -43,14 +51,14 @@ def is_challenge_solved():
 
 # --- Monitor Thread ---
 def monitor_and_control():
-    previous_state = None
-    reset_lights()
+    previous_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
+    reset_strip(1)
     while True:
         current_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
         if current_state != previous_state:
             log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
             if is_challenge_solved():
-                light_up_segment(3)
+                light_up_segments(1, 3)
             previous_state = current_state
         time.sleep(0.5)
 
