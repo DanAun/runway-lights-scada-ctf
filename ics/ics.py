@@ -23,7 +23,7 @@ from govee.govee_control import reset_all_strips, activate_team_light
 # --- Constants ---
 ICS_SERVER_PORT = 5020  # Use 502 in production so wireshark autodetects protocol
 COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
-SOLVE_DELAY = 3 # Number of seconds light needs to be on before considering the challenge solved
+SOLVE_DELAY = 60 # Number of seconds light needs to be on before considering the challenge solved
 
 # --- Modbus Data Store ---
 store = ModbusSlaveContext(
@@ -58,7 +58,7 @@ def monitor_and_control():
         if current_state != previous_state:
             log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
             if is_challenge_solved():
-                activate_team_light(29)
+                activate_team_light(12)
             previous_state = current_state
         time.sleep(0.5)
 

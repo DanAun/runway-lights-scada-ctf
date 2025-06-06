@@ -38,7 +38,7 @@ def activate_team_light(team_num):
     if team_num not in range(1,MAX_TEAM_NUM+1):
         raise ValueError("team_num should be in range 1 to %d" % MAX_TEAM_NUM+1)
     team_id = team_num - 1
-    strip = team_id // SEGMENT_PER_STRIP
+    strip = (team_id // SEGMENT_PER_STRIP) + 1
     segment = team_id % SEGMENT_PER_STRIP
     try:
         light_up_segments(strip, segment)
