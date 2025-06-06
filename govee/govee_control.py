@@ -1,11 +1,16 @@
 import logging
-
 log = logging.getLogger("ICS")
 
 import requests
 import os
-from dotenv import load_dotenv, dotenv_values 
+from dotenv import load_dotenv
 load_dotenv()
+
+# Constants
+STRIPS_USED = 4 # Number of LED strips used
+SEGMENT_PER_STRIP = 10 # Number of segments on the strips
+MAX_TEAM_NUM = STRIPS_USED * SEGMENT_PER_STRIP # Max number of teams we can include with the LEDs
+DEFAULT_LIGHT_COLOR = 0xFFFFFF # Default light color when lighing up segments
 
 # Govee API settings
 API_URL = "https://openapi.api.govee.com/router/api/v1/device/control"
@@ -17,26 +22,32 @@ SKU = os.getenv("GOVEE_SKU")
 
 def get_device_id(strip_num : int):
     """
-    Gets the device ID for the strip (1-4)
+    Gets the device ID for the strips (1-STRIPS_USED)
     """
-    return os.getenv("GOVEE_DEVICE_" + str(strip_num))
+    id = os.getenv("GOVEE_DEVICE_" + str(strip_num))
+    if not id:
+        raise KeyError("Missing GOVEE_DEVICE_" + "%d value in .env for strip %d" % (strip_num, strip_num))
+    else:
+        return id
 
 def activate_team_light(team_num):
     """
     Activates the given team_num's corresponding LED segments by calling light_up_segments with correct device and segment
-    team_num should be from 1-40
+    team_num should be from 1 to MAX_TEAM_NUM
     """
+    if team_num not in range(1,MAX_TEAM_NUM+1):
+        raise ValueError("team_num should be in range 1 to %d" % MAX_TEAM_NUM+1)
+    team_id = team_num - 1
+    strip = team_id // SEGMENT_PER_STRIP
+    segment = team_id % SEGMENT_PER_STRIP
+    try:
+        light_up_segments(strip, segment)
+        log.info("Successfully activated team %d's LED segment!" % (team_num))
+    except Exception as e:
+        log.critical("Failed to turn on team %d's LED segment because: %s" % (team_num, e))
 
-    if not 0 < team_num < 40:
-        raise ValueError("team_num should be in range 1-40")
-    team_num -= 1 # Convert from range 1-40 to 0-39
-    strip = team_num // 10 + 1
-    segment = team_num % 10
-     
-    light_up_segments(strip, segment)
 
-
-def light_up_segments(strip_num, segment_id, color=0xFFFFFF):
+def light_up_segments(strip_num, segment_id, color=DEFAULT_LIGHT_COLOR):
     log.debug(f"Lighting up segment {segment_id}")
     device_id = get_device_id(strip_num)
 
@@ -68,7 +79,7 @@ def light_up_segments(strip_num, segment_id, color=0xFFFFFF):
     try:
         rgb_response = requests.post(API_URL, headers=HEADERS, json=rgb_payload)
         if rgb_response.status_code == 200:
-            log.info("Successfully turned on segment(s) %s on strip number %d" % (segment_id, strip_num))
+            log.debug("Successfully turned on segment(s) %s on strip number %d" % (segment_id, strip_num))
         else:
             log.error("Something went wrong when turning on segment(s) %s on strip number %d. ERROR CODE: %s - %s" % (segment_id, strip_num, rgb_response.status_code, rgb_response.text))
 
@@ -76,8 +87,12 @@ def light_up_segments(strip_num, segment_id, color=0xFFFFFF):
         log.error(f"Error lighting up segment: {e}")
 
 def reset_all_strips():
-    for i in range(1,5):
-        reset_strip(i)
+    try:
+        for i in range(1,STRIPS_USED+1):
+            reset_strip(i)
+        log.info("Successfully reset all strips!")
+    except Exception as e:
+        log.error("Failed to reset all strips! Following exception encountered: %s" % e)
         
 def reset_strip(strip_num):
     """
@@ -85,9 +100,13 @@ def reset_strip(strip_num):
     This means we turn off all segments and set brighntess to max to ready the lights for use.
     """
 
-    if not 0 < strip_num < 5:
-        raise ValueError("strip_num should be 1-4")
-    device_id = get_device_id(strip_num)
+    if strip_num not in range(1,STRIPS_USED+1):
+        raise ValueError("strip_num should be in range 1 to %d" % STRIPS_USED)
+    try:
+        device_id = get_device_id(strip_num)
+    except KeyError as e:
+        log.error("Failed to reset strip %d because: %s" % (strip_num, e))
+        return
     # Set all segments to no light
     no_light_payload = {
         "requestId": "light-up",
@@ -98,7 +117,7 @@ def reset_strip(strip_num):
                 "type": "devices.capabilities.segment_color_setting",
                 "instance": "segmentedColorRgb",
                 "value": {
-                    "segment": list(range(10)),
+                    "segment": list(range(SEGMENT_PER_STRIP)),
                     "rgb": 0x000000  # Black -> OFF
                 }
             }
@@ -115,7 +134,7 @@ def reset_strip(strip_num):
                 "type": "devices.capabilities.segment_color_setting",
                 "instance": "segmentedBrightness",
                 "value": {
-                    "segment": list(range(10)),
+                    "segment": list(range(SEGMENT_PER_STRIP)),
                     "brightness": 100
                 }
             }
@@ -136,7 +155,7 @@ def reset_strip(strip_num):
             log.error("Something went wrong when setting brighntess to 100", 'ERROR CODE: ' + brightness_response.status_code, brightness_response.text)
 
         if no_light_response.status_code == 200 and brightness_response.status_code == 200:
-            log.info("Successfully reset strip %d" % strip_num)
+            log.debug("Successfully reset strip %d" % strip_num)
 
     except Exception as e:
-        log.error(f"Error resetting lights: {e}")
+        log.error(f"Exception when resetting strip {strip_num}: {e}")
