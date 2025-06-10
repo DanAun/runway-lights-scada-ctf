@@ -24,6 +24,7 @@ from govee.govee_control import reset_all_strips, activate_team_light
 ICS_SERVER_PORT = 5020  # Use 502 in production so wireshark autodetects protocol
 COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
 SOLVE_DELAY = 60 # Number of seconds light needs to be on before considering the challenge solved
+CHECK_INTERVAL = 0.5 # Interval at which it will check that runwaylight is on, both when considering if challenge is solved and in main thred
 
 # --- Modbus Data Store ---
 store = ModbusSlaveContext(
@@ -42,11 +43,13 @@ def is_challenge_solved():
     while True:
         is_current_state_on = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
         if not is_current_state_on:
+            log.debug('Runway Lights turned off - \'malware\' is lickely still running')
             return False
         # Check if the elapsed time has reached SOLVE_DELAY
         elapsed_time = time.time() - start_time
         if elapsed_time >= SOLVE_DELAY:
             break  # Exit the loop if the delay has passed
+        time.sleep(CHECK_INTERVAL)
     return True
 
 # --- Monitor Thread ---
@@ -56,11 +59,11 @@ def monitor_and_control():
     while True:
         current_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
         if current_state != previous_state:
-            log.info(f"[ICS EVENT] Runway light changed to {'ON' if current_state else 'OFF'}")
+            log.info(f"Runway light changed to {'ON' if current_state else 'OFF'}")
             if is_challenge_solved():
                 activate_team_light(12)
             previous_state = current_state
-        time.sleep(0.5)
+        time.sleep(CHECK_INTERVAL)
 
 # --- Device Identity (for visibility in tools like Wireshark) ---
 identity = ModbusDeviceIdentification()
@@ -72,9 +75,12 @@ identity.MajorMinorRevision = "3.0"
 
 # --- Start the Server ---
 def start_ics_server():
-    Thread(target=monitor_and_control, daemon=True).start()
     log.info("ICS Modbus TCP Server is starting on port %d..." % ICS_SERVER_PORT)
     StartTcpServer(context, identity=identity, address=("0.0.0.0", ICS_SERVER_PORT))
+
+    log.debug("Starting monitoring and control thread...")
+    Thread(target=monitor_and_control, daemon=True).start()
+
 
 if __name__ == "__main__":
     start_ics_server()
