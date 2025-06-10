@@ -2,7 +2,8 @@ import logging
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_limiter import Limiter
 from pymodbus.client import ModbusTcpClient
-from ics.ics import ICS_SERVER_PORT
+import requests
+from ics.ics import ICS_SERVER_PORT, ICS_API_PORT
 import os
 
 
@@ -10,13 +11,14 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARN)
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)  # Use a fixed key in production
+app.secret_key = os.urandom(24)
 
 # Dummy credentials
 USERNAME = "admin"
 PASSWORD = "password"
 
 ICS_SERVER_IP = '127.0.0.1'
+SCADA_WEB_PORT = 8000 # Port of SCADA webUI server ti be started on
 COIL_ADDRESS = 0  # Single runway light coil address
 
 def get_light_status():
@@ -49,7 +51,12 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if request.form['username'] == USERNAME and request.form['password'] == PASSWORD:
+        username = request.form['username']
+        password = request.form['password']
+
+        # Send a request to the ICS API for authentication
+        response = requests.post(f'http://{ICS_SERVER_IP}:{ICS_API_PORT}/api/login', json={'username': username, 'password': password})
+        if response.status_code == 200:
             session['logged_in'] = True
             return redirect(url_for('home'))
         else:
@@ -98,4 +105,4 @@ def get_status():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000, debug=True)
+    app.run(host='0.0.0.0', port=SCADA_WEB_PORT, debug=True)
