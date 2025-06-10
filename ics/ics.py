@@ -75,11 +75,17 @@ identity.MajorMinorRevision = "3.0"
 
 # --- Start the Server ---
 def start_ics_server():
-    log.info("ICS Modbus TCP Server is starting on port %d..." % ICS_SERVER_PORT)
-    StartTcpServer(context, identity=identity, address=("0.0.0.0", ICS_SERVER_PORT))
-
-    log.debug("Starting monitoring and control thread...")
-    Thread(target=monitor_and_control, daemon=True).start()
+    try:
+        log.info("ICS Modbus TCP Server is starting on port %d...", ICS_SERVER_PORT)
+        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("0.0.0.0", ICS_SERVER_PORT)}, daemon=True).start()
+    except Exception as e:
+        log.critical("Failed to start ICS Modbus TCP Server: %s", e)
+        
+    try:
+        log.debug("Starting monitoring and control thread...")
+        Thread(target=monitor_and_control, daemon=True).start()
+    except Exception as e:
+        log.critical("Failed to start monitoring and control thread: %s", e)
 
 
 if __name__ == "__main__":
