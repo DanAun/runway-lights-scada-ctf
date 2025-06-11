@@ -30,7 +30,7 @@ def get_device_id(strip_num : int):
     else:
         return id
 
-def activate_team_light(team_num):
+def toggle_team_light(team_num, toggle : bool):
     """
     Activates the given team_num's corresponding LED segments by calling light_up_segments with correct device and segment
     team_num should be from 1 to MAX_TEAM_NUM
@@ -40,15 +40,22 @@ def activate_team_light(team_num):
     team_id = team_num - 1
     strip = (team_id // SEGMENT_PER_STRIP) + 1
     segment = team_id % SEGMENT_PER_STRIP
-    try:
-        light_up_segments(strip, segment)
-        log.info("Successfully activated team %d's LED segment!" % (team_num))
-    except Exception as e:
-        log.critical("Failed to turn on team %d's LED segment because: %s" % (team_num, e))
+    if toggle:
+        try:
+            light_up_segments(strip, segment)
+            log.info("Successfully turned on team %d's LED segment!" % (team_num))
+        except Exception as e:
+            log.critical("Failed to turn on team %d's LED segment because: %s" % (team_num, e))
+    else:
+        try:
+            turn_off_segments(strip, segment)
+            log.info("Successfully turned off team %d's LED segment!" % (team_num))
+        except Exception as e:
+            log.critical("Failed to turn off team %d's LED segment because: %s" % (team_num, e))
 
 
 def light_up_segments(strip_num, segment_id, color=DEFAULT_LIGHT_COLOR):
-    log.debug(f"Lighting up segment {segment_id}")
+    log.debug(f"Toggling segment {segment_id}")
     device_id = get_device_id(strip_num)
 
     # Check if segment_id is a list; if not, convert it to a list
@@ -79,12 +86,15 @@ def light_up_segments(strip_num, segment_id, color=DEFAULT_LIGHT_COLOR):
     try:
         rgb_response = requests.post(API_URL, headers=HEADERS, json=rgb_payload)
         if rgb_response.status_code == 200:
-            log.debug("Successfully turned on segment(s) %s on strip number %d" % (segment_id, strip_num))
+            log.debug("Successfully toggeled segment(s) %s on strip number %d" % (segment_id, strip_num))
         else:
-            log.error("Something went wrong when turning on segment(s) %s on strip number %d. ERROR CODE: %s - %s" % (segment_id, strip_num, rgb_response.status_code, rgb_response.text))
+            log.error("Something went wrong when toggling segment(s) %s on strip number %d. ERROR CODE: %s - %s" % (segment_id, strip_num, rgb_response.status_code, rgb_response.text))
 
     except Exception as e:
-        log.error(f"Error lighting up segment: {e}")
+        log.error(f"Error toggling segment: {e}")
+
+def turn_off_segments(strip_num, segment_id):
+    light_up_segments(strip_num, segment_id, color=0x000000)
 
 def reset_all_strips():
     try:
