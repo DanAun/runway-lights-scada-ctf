@@ -28,6 +28,5 @@ function fetchStatus() {
     .catch(err => console.error('Status fetch failed:', err));
 }
 
-// Initial fetch and poll every 5 seconds (5000 ms)
 fetchStatus();
 setInterval(fetchStatus, 1000);
