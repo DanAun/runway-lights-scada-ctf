@@ -3,7 +3,7 @@ import os
 
 # --- Logging Setup ---
 logging.basicConfig(
-    level=logging.INFO,  # Set the logging level
+    level=logging.DEBUG,  # Set the logging level
     format='%(asctime)s - [ICS] - %(levelname)s: %(message)s',  # Custom format
     datefmt='%H:%M:%S'  # Display only hour, minute, and second
 )
@@ -18,6 +18,7 @@ from pymodbus.device import ModbusDeviceIdentification
 from flask import Flask, request, jsonify, session
 from threading import Thread
 import time
+from waitress import serve
 
 from govee.govee_control import reset_all_strips, toggle_team_light
 
@@ -136,7 +137,7 @@ identity.MajorMinorRevision = "3.0"
 def start_ics_server():
     try:
         log.info("ICS Modbus TCP Server is starting on port %d...", ICS_SERVER_PORT)
-        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("0.0.0.0", ICS_SERVER_PORT)}, daemon=True).start()
+        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("localhost", ICS_SERVER_PORT)}, daemon=True).start()
     except Exception as e:
         log.critical("Failed to start ICS Modbus TCP Server: %s", e)
         
@@ -148,7 +149,7 @@ def start_ics_server():
 
     try:
         log.debug("Running authentication API on port %d" % ICS_API_PORT)
-        app.run(host='0.0.0.0', port=ICS_API_PORT)
+        serve(app, host='localhost', port=ICS_API_PORT)
     except Exception as e:
         log.critical("Failed to start authentication API on port %d" % ICS_API_PORT)
 

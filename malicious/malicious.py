@@ -1,13 +1,14 @@
 import pymodbus.exceptions
 from pymodbus.client import ModbusTcpClient
 import time
+from ics.ics import ICS_SERVER_PORT
 
 REQUEST_FREQUENCY = 5  # Frequency of requests in seconds
 RETRY_DELAY = 10  # Delay in seconds before retrying connection
 
 def loop_modbus_request():
     # Create a Modbus TCP client
-    client = ModbusTcpClient('localhost', port=5020)
+    client = ModbusTcpClient('localhost', port=ICS_SERVER_PORT)
     
     while True:
         try:

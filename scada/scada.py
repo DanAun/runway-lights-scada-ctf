@@ -5,6 +5,7 @@ from pymodbus.client import ModbusTcpClient
 import requests
 from ics.ics import ICS_SERVER_PORT, ICS_API_PORT
 import os
+from waitress import serve
 
 
 log = logging.getLogger('werkzeug')
@@ -12,10 +13,6 @@ log.setLevel(logging.WARN)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
-
-# Dummy credentials
-USERNAME = "admin"
-PASSWORD = "password"
 
 ICS_SERVER_IP = '127.0.0.1'
 SCADA_WEB_PORT = 8000 # Port of SCADA webUI server ti be started on
@@ -78,9 +75,8 @@ limiter = Limiter(
 @app.route('/toggle', methods=['POST'])
 @limiter.limit("1 per second")  # Rate limit for this specific route
 def toggle():
-    # -------------  !!!!!!!!!!!!!IMPORTANT REMOVE UNCOMMENT THE SESSIONS CHECK!!!!!!!!!!!!
-    #if not session.get('logged_in'):
-     #   return jsonify({'status': 'unauthorized'}), 401
+    if not session.get('logged_in'):
+        return jsonify({'status': 'unauthorized'}), 401
 
     action = request.form.get('action')
     state = True if action == "ON" else False
@@ -105,4 +101,4 @@ def get_status():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=SCADA_WEB_PORT, debug=True)
+    serve(app, host='localhost', port=SCADA_WEB_PORT)
