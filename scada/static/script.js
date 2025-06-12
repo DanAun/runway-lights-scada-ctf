@@ -29,4 +29,4 @@ function fetchStatus() {
 }
 
 fetchStatus();
-setInterval(fetchStatus, 1000);
+setInterval(fetchStatus, 3000);
