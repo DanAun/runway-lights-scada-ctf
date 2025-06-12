@@ -62,12 +62,18 @@ def login():
         password = request.form['password']
 
         # Send a request to the ICS API for authentication
-        response = requests.post(f'http://{ICS_SERVER_IP}:{ICS_API_PORT}/api/login', json={'username': username, 'password': password})
-        if response.status_code == 200:
-            session['logged_in'] = True
-            return redirect(url_for('home'))
-        else:
-            return render_template('login.html', error="Invalid credentials.")
+        try:
+            response = requests.post(f'http://{ICS_SERVER_IP}:{ICS_API_PORT}/api/login', json={'username': username, 'password': password})
+            if response.status_code == 200:
+                session['logged_in'] = True
+                return redirect(url_for('home'))
+            elif response.status_code == 403:
+                return render_template('login.html', error="Invalid credentials.")
+            else:
+                raise requests.exceptions.RequestException
+        except requests.exceptions.RequestException as err:
+            return render_template('login.html', error="Failed to communicate with ICS server. Call CTF staff!")
+        
     return render_template('login.html')
 
 @app.route('/logout')
