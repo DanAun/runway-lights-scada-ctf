@@ -11,8 +11,6 @@ def loop_modbus_request():
     client = ModbusTcpClient('localhost', port=ICS_SERVER_PORT)
     
     while True:
-        # Small delay to prevent overwhelming the server
-        time.sleep(REQUEST_FREQUENCY)
         try:
             # Connect to the server
             client.connect()
@@ -24,11 +22,14 @@ def loop_modbus_request():
             print(f"Connection error: {e}")
             print("Retrying in %d seconds..." % RETRY_DELAY)
             time.sleep(RETRY_DELAY)
-        except KeyboardInterrupt:
-            print("Script stopped by user")
-            exit(0)
         finally:
             client.close()
 
+        # Small delay to prevent overwhelming the server
+        time.sleep(REQUEST_FREQUENCY)
+
 if __name__ == "__main__":
-    loop_modbus_request()
+    try:
+        loop_modbus_request()
+    except KeyboardInterrupt:
+        print("Script stopped by user")

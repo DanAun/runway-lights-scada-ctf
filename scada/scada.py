@@ -1,4 +1,12 @@
 import logging
+
+# --- Logging Setup ---
+logging.basicConfig(
+    level=logging.INFO,  # Set the logging level
+    format='%(asctime)s - [SCADA] - %(levelname)s: %(message)s',  # Custom format
+    datefmt='%H:%M:%S'  # Display only hour, minute, and second
+)
+
 import sys
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_limiter import Limiter
@@ -117,4 +125,7 @@ def get_status():
 
 
 if __name__ == '__main__':
-    serve(app, host='localhost', port=SCADA_WEB_PORT)
+    try:
+        serve(app, host='localhost', port=SCADA_WEB_PORT)
+    except KeyboardInterrupt:
+        log.info("Server shutdown by user")

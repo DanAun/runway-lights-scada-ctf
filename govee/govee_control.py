@@ -1,11 +1,18 @@
 import logging
+import sys
 log = logging.getLogger("ICS")
 
-import time
 import requests
 import os
 from dotenv import load_dotenv
-load_dotenv()
+
+# Get correct base path inside the PyInstaller bundle
+if getattr(sys, 'frozen', False):
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.abspath(".")
+
+load_dotenv(os.path.join(base_path, '.env'))
 
 # Constants
 STRIPS_USED = 4 # Number of LED strips used

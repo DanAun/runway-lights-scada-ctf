@@ -109,7 +109,7 @@ def monitor_and_control():
                     # Tease the players with the light
                     toggle_team_light(team_num, True)
                     is_strip_on = True
-                    already_teased = False# True
+                    already_teased = True
                     time.sleep(ics.constants.MIN_TEASE_TIME)
             else: # Toggled lights off
                 if is_strip_on:
@@ -148,4 +148,7 @@ def start_ics_server():
 
 
 if __name__ == "__main__":
-    start_ics_server()
+    try:
+        start_ics_server()
+    except KeyboardInterrupt:
+        log.info("Server shutdown by user")
