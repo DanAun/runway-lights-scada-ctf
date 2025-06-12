@@ -1,18 +1,28 @@
 import logging
+import sys
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_limiter import Limiter
 from pymodbus.client import ModbusTcpClient
 import requests
-from ics.ics import ICS_SERVER_PORT, ICS_API_PORT
+from ics.constants import ICS_SERVER_PORT, ICS_API_PORT
 import os
 from waitress import serve
 
+if getattr(sys, 'frozen', False):
+    # Running in a PyInstaller bundle
+    base_path = sys._MEIPASS
+else:
+    base_path = os.path.abspath(".")
+
+template_path = os.path.join(base_path, "scada", "templates")
+static_path = os.path.join(base_path, "scada", "static")
+
+app = Flask(__name__, template_folder=template_path, static_folder=static_path)
+app.secret_key = os.urandom(24)
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARN)
 
-app = Flask(__name__)
-app.secret_key = os.urandom(24)
 
 ICS_SERVER_IP = '127.0.0.1'
 SCADA_WEB_PORT = 8000 # Port of SCADA webUI server ti be started on

@@ -20,22 +20,14 @@ from threading import Thread
 import time
 from waitress import serve
 
-from govee.govee_control import reset_all_strips, toggle_team_light
+import ics.constants
+from govee.govee_control import toggle_team_light
 
-
-
-# --- Constants ---
-ICS_SERVER_PORT = 5020  # Use 502 in production so wireshark autodetects protocol
-ICS_API_PORT = 54321 # Port on which the authenticator API listens
-COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
-SOLVE_DELAY = 60 # Number of seconds light needs to be on before considering the challenge solved
-CHECK_INTERVAL = 0.5 # Interval at which it will check that runwaylight is on, both when considering if challenge is solved and in main thred
-MIN_TEASE_TIME = 10 # Minimal time that lights will be on when 'teasing' the players
 
 # --- Modbus Data Store ---
 store = ModbusSlaveContext(
     di=None,
-    co={COIL_RUNWAY_LIGHT: False},  # Initial state OFF
+    co={ics.constants.COIL_RUNWAY_LIGHT: False},  # Initial state OFF
     hr=None,
     ir=None
 )
@@ -75,15 +67,15 @@ def is_challenge_solved():
     log.debug("Checking if challenge is solved...")
     start_time = time.time()
     while True:
-        is_current_state_on = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
+        is_current_state_on = context[0].getValues(1, ics.constants.COIL_RUNWAY_LIGHT, count=1)[0]
         if not is_current_state_on:
             log.debug('Challenge is not solved! Runway Lights turned off - \'malware\' is lickely still running')
             return False
         # Check if the elapsed time has reached SOLVE_DELAY
         elapsed_time = time.time() - start_time
-        if elapsed_time >= SOLVE_DELAY:
+        if elapsed_time >= ics.constants.SOLVE_DELAY:
             break  # Exit the loop if the delay has passed
-        time.sleep(CHECK_INTERVAL)
+        time.sleep(ics.constants.CHECK_INTERVAL)
     return True
 
 # --- Monitor Thread ---
@@ -92,10 +84,10 @@ def monitor_and_control():
     is_strip_on = False # Whether the physical ligth strip segment is on
     already_solved = False # Whether the CTF challenge was already solved
     already_teased = False # Whether the team has been teased with the lights
-    previous_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
+    previous_state = context[0].getValues(1, ics.constants.COIL_RUNWAY_LIGHT, count=1)[0]
     while True:
-        time.sleep(CHECK_INTERVAL)
-        current_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
+        time.sleep(ics.constants.CHECK_INTERVAL)
+        current_state = context[0].getValues(1, ics.constants.COIL_RUNWAY_LIGHT, count=1)[0]
         if current_state != previous_state:
             log.info(f"Runway light changed to {'ON' if current_state else 'OFF'}")
             if team_num is None:
@@ -118,7 +110,7 @@ def monitor_and_control():
                     toggle_team_light(team_num, True)
                     is_strip_on = True
                     already_teased = False# True
-                    time.sleep(MIN_TEASE_TIME)
+                    time.sleep(ics.constants.MIN_TEASE_TIME)
             else: # Toggled lights off
                 if is_strip_on:
                     toggle_team_light(team_num, False)
@@ -137,8 +129,8 @@ identity.MajorMinorRevision = "3.0"
 # --- Start the Server ---
 def start_ics_server():
     try:
-        log.info("ICS Modbus TCP Server is starting on port %d...", ICS_SERVER_PORT)
-        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("localhost", ICS_SERVER_PORT)}, daemon=True).start()
+        log.info("ICS Modbus TCP Server is starting on port %d...", ics.constants.ICS_SERVER_PORT)
+        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("localhost", ics.constants.ICS_SERVER_PORT)}, daemon=True).start()
     except Exception as e:
         log.critical("Failed to start ICS Modbus TCP Server: %s", e)
         
@@ -149,10 +141,10 @@ def start_ics_server():
         log.critical("Failed to start monitoring and control thread: %s", e)
 
     try:
-        log.debug("Running authentication API on port %d" % ICS_API_PORT)
-        serve(app, host='localhost', port=ICS_API_PORT)
+        log.debug("Running authentication API on port %d" % ics.constants.ICS_API_PORT)
+        serve(app, host='localhost', port=ics.constants.ICS_API_PORT)
     except Exception as e:
-        log.critical("Failed to start authentication API on port %d" % ICS_API_PORT)
+        log.critical("Failed to start authentication API on port %d" % ics.constants.ICS_API_PORT)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import pymodbus.exceptions
 from pymodbus.client import ModbusTcpClient
 import time
-from ics.ics import ICS_SERVER_PORT
+from ics.constants import ICS_SERVER_PORT
 
 REQUEST_FREQUENCY = 10  # Frequency of requests in seconds
 RETRY_DELAY = 10  # Delay in seconds before retrying connection
