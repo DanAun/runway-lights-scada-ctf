@@ -15,7 +15,7 @@ This project simulates a simplified SCADA system for controlling airport runway 
 
 ---
 
-## How to Run
+## How to Run in Developement
 
 Make sure you have Python 3 installed. Then:
 
@@ -37,6 +37,23 @@ python main.py
 python -m ics.ics
 python -m scada.scada
 python -m malicious.malicious
+```
+
+## How to compile
+
+1. **Install dependencies:**
+
+Install dependencies if you haven't already
+
+```bash
+pip install -r requirements.txt
+```
+
+2. **Compile each component:**
+```bash
+pyinstaller ics.spec
+pyinstaller scada.spec
+pyinstaller malicious.spec
 ```
 
 ## Notes
