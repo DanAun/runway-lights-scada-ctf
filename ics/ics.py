@@ -30,6 +30,7 @@ ICS_API_PORT = 54321 # Port on which the authenticator API listens
 COIL_RUNWAY_LIGHT = 0   # Coil address 0 represents the only runway light
 SOLVE_DELAY = 60 # Number of seconds light needs to be on before considering the challenge solved
 CHECK_INTERVAL = 0.5 # Interval at which it will check that runwaylight is on, both when considering if challenge is solved and in main thred
+MIN_TEASE_TIME = 10 # Minimal time that lights will be on when 'teasing' the players
 
 # --- Modbus Data Store ---
 store = ModbusSlaveContext(
@@ -92,7 +93,6 @@ def monitor_and_control():
     already_solved = False # Whether the CTF challenge was already solved
     already_teased = False # Whether the team has been teased with the lights
     previous_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
-    reset_all_strips()
     while True:
         time.sleep(CHECK_INTERVAL)
         current_state = context[0].getValues(1, COIL_RUNWAY_LIGHT, count=1)[0]
@@ -117,7 +117,8 @@ def monitor_and_control():
                     # Tease the players with the light
                     toggle_team_light(team_num, True)
                     is_strip_on = True
-                    already_teased = True
+                    already_teased = False# True
+                    time.sleep(MIN_TEASE_TIME)
             else: # Toggled lights off
                 if is_strip_on:
                     toggle_team_light(team_num, False)
