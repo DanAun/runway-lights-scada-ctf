@@ -1,6 +1,7 @@
 import logging
 log = logging.getLogger("ICS")
 
+import time
 import requests
 import os
 from dotenv import load_dotenv
@@ -11,6 +12,7 @@ STRIPS_USED = 4 # Number of LED strips used
 SEGMENT_PER_STRIP = 10 # Number of segments on the strips
 MAX_TEAM_NUM = STRIPS_USED * SEGMENT_PER_STRIP # Max number of teams we can include with the LEDs
 DEFAULT_LIGHT_COLOR = 0xFFFFFF # Default light color when lighing up segments
+API_REQUEST_TIMEOUT = 30 # Timeout after which will consider call to govee API failed
 
 # Govee API settings
 API_URL = "https://openapi.api.govee.com/router/api/v1/device/control"
@@ -84,7 +86,7 @@ def light_up_segments(strip_num, segment_id, color=DEFAULT_LIGHT_COLOR):
 
 
     try:
-        rgb_response = requests.post(API_URL, headers=HEADERS, json=rgb_payload)
+        rgb_response = requests.post(API_URL, headers=HEADERS, json=rgb_payload, timeout=API_REQUEST_TIMEOUT)
         if rgb_response.status_code == 200:
             log.debug("Successfully toggeled segment(s) %s on strip number %d" % (segment_id, strip_num))
         else:
@@ -152,20 +154,20 @@ def reset_strip(strip_num):
     }
 
     try:
-        no_light_response = requests.post(API_URL, headers=HEADERS, json=no_light_payload)
+        no_light_response = requests.post(API_URL, headers=HEADERS, json=no_light_payload, timeout=API_REQUEST_TIMEOUT)
         if no_light_response.status_code == 200:
             log.debug("Successfully set light off")
         else:
             log.error("Something went wrong when setting lights to OFF", 'ERROR CODE: ' + no_light_response.status_code, no_light_response.text)
 
-        brightness_response = requests.post(API_URL, headers=HEADERS, json=brightness_payload)
+        brightness_response = requests.post(API_URL, headers=HEADERS, json=brightness_payload, timeout=API_REQUEST_TIMEOUT)
         if brightness_response.status_code == 200:
             log.debug("Successfully set brightness of LEDs to 100")
         else:
             log.error("Something went wrong when setting brighntess to 100", 'ERROR CODE: ' + brightness_response.status_code, brightness_response.text)
 
         if no_light_response.status_code == 200 and brightness_response.status_code == 200:
-            log.debug("Successfully reset strip %d" % strip_num)
+            log.info("Successfully reset strip %d" % strip_num)
 
     except Exception as e:
         log.error(f"Exception when resetting strip {strip_num}: {e}")
