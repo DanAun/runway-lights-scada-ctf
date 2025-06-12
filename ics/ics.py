@@ -3,7 +3,7 @@ import os
 
 # --- Logging Setup ---
 logging.basicConfig(
-    level=logging.DEBUG,  # Set the logging level
+    level=logging.INFO,  # Set the logging level
     format='%(asctime)s - [ICS] - %(levelname)s: %(message)s',  # Custom format
     datefmt='%H:%M:%S'  # Display only hour, minute, and second
 )
