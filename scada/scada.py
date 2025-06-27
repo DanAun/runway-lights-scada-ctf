@@ -49,17 +49,27 @@ def get_light_status():
         client.close()
     return result.bits[0]
 
+def received_flag():
+    """Function that reads flag from ics server when challenge is solved. Returns None if challenge is not solved."""
+    # Send a request to the ICS API for authentication
+    try:
+        response = requests.get(f'http://{ICS_SERVER_IP}:{ICS_API_PORT}/api/flag')
+        if response.status_code == 200:
+            return response.json().get('flag')
+        elif response.status_code == 403:
+            return None
+        else:
+            raise requests.exceptions.RequestException
+    except requests.exceptions.RequestException as err:
+        log.error("Failed to retreive flag from ics server!", err)
+
 @app.route('/')
 def home():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
 
-    result = get_light_status()
-
-    if result is None:
-        status = "Error"
-    else:
-        status = "ON" if result else "OFF"
+    status = get_status()
+    #status = "ECTL{{eifjw0ifjwo0}}"
 
     return render_template('index.html', status=status)
 
@@ -118,6 +128,10 @@ def toggle():
 def get_status():
     if not session.get('logged_in'):
         return jsonify({'status': 'unauthorized'}), 401
+    flag = received_flag()
+    if flag is not None:
+        log.info("Returned flag to the team!")
+        return jsonify({'runway_lights_state': flag})
     result = get_light_status()
     if result is None:
         return jsonify({'error': 'Modbus read failed'}), 500

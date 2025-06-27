@@ -3,6 +3,66 @@
 <head>
     <title>SCADA Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            padding: 40px;
+            background: #1c1c1c;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+            text-align: center;
+        }
+
+        .login-container h2 {
+            color: #0ff;
+            margin-bottom: 20px;
+        }
+
+        .login-container input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #333;
+            color: #eee;
+            font-size: 16px;
+        }
+
+        .login-container input:focus {
+            outline: none;
+            box-shadow: 0 0 5px #0ff;
+        }
+
+        .login-container button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background-color: #0ff;
+            color: #000;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .login-container button:hover {
+            background-color: #0cc;
+        }
+
+        .login-container button:active {
+            transform: scale(0.96);
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .error {
+            color: orange;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">

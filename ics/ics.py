@@ -40,6 +40,7 @@ app.secret_key = os.urandom(24)
 # User data for authentication with hashed passwords
 users = {'team1': b'$2b$12$hUHULBpAOCqqGwnBVTskaeJPK7VuxlJYiPWKIWvPLJcmMZY.slF7q', 'team2': b'$2b$12$B/v7cyW75.tcn1g6OmThk.U1ho84phDLwCV6wwlpwjuxyRGCbrtiW', 'team3': b'$2b$12$fMdVg1l9655a6wIC07.6gOXoirAlDSlEKWqCvuo4bzkabHMRB6w8i', 'team4': b'$2b$12$bOl0AG4OAN5/FHDluN988.g/koIJ4mP5rxrGdXKn.Ab5GOVA1MtaS', 'team5': b'$2b$12$cNmf0ZvZUefVOcriiAYJa.Lj3.dXWSIrNBb5GwKEDs8EiBmJcNvoS', 'team6': b'$2b$12$HB5gxqoH3jTXdEKcXsT7huMhy1toZt5J.ArCKI3CRsQsTHXHoCdzu', 'team7': b'$2b$12$AZCN8B9RI9Q4.ao8Wq9aU.ABUgBjcRLxIvTWHViC60mQ71QyEb9gm', 'team8': b'$2b$12$rBk877KbUQ1ToZ/bUYmCAOD31Kw6irzMkMBvSu94dWAxCEJrEdWUy', 'team9': b'$2b$12$ZTEGIJeBRjqqL8GxnX/W4.B.Hg2UawoYXZL4g5Umw.MXtvcHCuqOC', 'team10': b'$2b$12$duAx.XAQQC9gIz7eHz9cxO/Kjy4ecdNpPtUXhz7yeacLmw5y8CVUi', 'team11': b'$2b$12$hH0XBI94VQHs6pbHfQEYROgeGGdL6YUkVbc1MxBKMoDgkx8lnjh.q', 'team12': b'$2b$12$sysnUgIW9X2IfgO3Z9EJT.dWj9q5dBQ3uw8O.tdKethx8aa62/ZsW', 'team13': b'$2b$12$/VStnpCPfoMK16Bl4zY2h.Tj6vD2sPZD6nukXUfAdyGl.HN1wbTZ6', 'team14': b'$2b$12$VH3/srW6sVUID7nHEUXYzObcFtH/DswD1jJB2OLHjmwAlM./UF2pS', 'team15': b'$2b$12$2wIEl8S4.ctW6z5DggvJ/OBn/u0xSwXa7x8LERS4smugP5lLcOqNO', 'team16': b'$2b$12$a4oKSQuF5hI4.t9MZz/VHeDGYa1Cv7WXMdYOOlKFFyjtlptKwX.dS', 'team17': b'$2b$12$1KkI1LS6n792mNyotJ/UuuTXsa0Wbh3uelcTlvtEuLKv5Ytp0dS0i', 'team18': b'$2b$12$OYJPAQw8HcpyB/No87PXv.XnVKkhuyfCvAqLk1/3JNdouo3Fesv.e', 'team19': b'$2b$12$SgYnCcv6qf0PO6O3AnqsHOyLzel99Rv5sN83/cQ8uVLaRyq6InPU2', 'team20': b'$2b$12$rs5zdJmt.QnE33Nz69pe9ORR8fJM5rYHgzsD1AYxzPWyssSi0dCdO', 'team21': b'$2b$12$sfuFAi2AthVIRKo1dk7WTe5KsvtKLrF7rcj0MlO1LxbNFrFO/Uy26', 'team22': b'$2b$12$8kgB.tnTo0M7ZoRdzRbcQOtUl.T3zl5wmnvtqssgO9xX0or6y3m/6', 'team23': b'$2b$12$VOOjVTrIF8TLnWVgcptxb.8pj33paMEYMZ3ns1RdgHtrYH6NxMJOW', 'team24': b'$2b$12$KaBeT7.kWjuGde3fE8qC4efZa.s9oaAfKvnb.cQwE0Gqc2G.OQ3ma', 'team25': b'$2b$12$c2F46gbx/O5xT.pkA6dIbOeQr0EJltG/k7ui97qrn.h/PI7DkaghG', 'team26': b'$2b$12$Lr.BvxY0.KLc.C1inSEivupUs259TYQaK9.DjJthjDCrWkDMYTaSW', 'team27': b'$2b$12$GLMFxNPTvLRr8mS4TIQVM.YYFsyOesSgVZkWtyswHgX2H0we7C6rm', 'team28': b'$2b$12$8SnTsw5h5hVtZCnzk6SIDemlZAkVvQjYDU2iKrgBKyYEfei09q26a', 'team29': b'$2b$12$ogTph.sdkgyWerxeGocxLu/nh20GZxW25M5jz/YRU9vNb8z//i6Dm', 'team30': b'$2b$12$382JyGKxxkc115wRiJJ7y.RnCBq.LdVQXS6nDC35tHTcyYEe.HaWe', 'team31': b'$2b$12$WWkc/l2A8aT0BHbknof1WuOY.1H4YTl0j/WwgW49dg.OPIJxVVHpm', 'team32': b'$2b$12$fXUgJeu74jE9EuBYWvrXoeplGkbc9CoQyTshkE9I/VQsKVq2VMYGS', 'team33': b'$2b$12$DqDaiN8HgsI5lQWKROVTEe/2YV5q1j5Bij4DG7TempXuOog9QrNaW', 'team34': b'$2b$12$f9TbQWn3fG8KhqUbw3GfcePNsmyAYNvgdPlGkfuqwO.WfK8Zd4nam', 'team35': b'$2b$12$K8Ds1JPzNY5KHagAUvjhA.KUt/clpG67bw9QVXB1mDBNUQMTOvl0C', 'team36': b'$2b$12$X6bOQnNd3eUaIe/ro/Z.G.RR1QGGNb4RTL3oy/9AEZs2iTwPJ5HC6', 'team37': b'$2b$12$U4rbpGKibJtXEwzLzQhIdOMu41BMHUb01oTDrmxZrIko0wtpP3j96', 'team38': b'$2b$12$eYhDa076uOWTt2XdLOaykemFC/O2kmRSMX0FGQZExalYfqXRWS3CO', 'team39': b'$2b$12$DYA6IRtz4v3lY0Cppm/3A.oiAhlsJjQotQvpnY6/rLLO/970cwyma', 'team40': b'$2b$12$f68wkp58LuHe1eLddujt5OyTbdY/ulDqkxiuWBcfQw2WOOPozM0ji'}
 team_num = None
+already_solved = False # Whether the CTF challenge is already solved
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -78,11 +79,18 @@ def is_challenge_solved():
         time.sleep(ics.constants.CHECK_INTERVAL)
     return True
 
+@app.route('/api/flag', methods=['GET'])
+def give_flag():
+    if already_solved:
+        return jsonify({'flag': ics.constants.flag_enc_b64}), 200
+    else:
+        return jsonify({'message': 'You have not solved the challenge yet!'}), 403
+
 # --- Monitor Thread ---
 def monitor_and_control():
     global team_num
+    global already_solved
     is_strip_on = False # Whether the physical ligth strip segment is on
-    already_solved = False # Whether the CTF challenge was already solved
     already_teased = False # Whether the team has been teased with the lights
     previous_state = context[0].getValues(1, ics.constants.COIL_RUNWAY_LIGHT, count=1)[0]
     while True:

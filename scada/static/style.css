@@ -1,35 +1,113 @@
 body {
-    background: #111;
-    color: #0f0;
-    font-family: monospace;
+    margin: 0;
+    padding: 0;
+    background-color: #222;
+    color: #eee;
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
 }
-.panel, .login-container {
-    background: #222;
-    padding: 2em;
-    border: 2px solid #0f0;
+
+.container {
+    width: 800px;
+    padding: 20px;
+    background: #1c1c1c;
     border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+h1 {
+    text-align: center;
+    color: #0ff;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #444;
     text-align: center;
 }
-input, button {
-    margin-top: 1em;
-    padding: 0.5em;
-    font-size: 1em;
+
+th {
+    background: #333;
 }
-button {
-    background: #0f0;
-    color: #000;
-    cursor: pointer;
-}
-.status-off {
-      color: red;
-    }
-.status-on {
-      color: green;
-    }
-.error {
+
+td.status-off {
+    background-color: #400;
     color: red;
+}
+
+td.status-on {
+    background-color: #040;
+    color: lime;
+}
+
+td.status-flag {
+  background-color: #054;
+  color: #0f0; 
+  font-weight: bold;
+}
+
+td.status-error {
+  background-color: #600;
+  color: #f0f0f0;
+}
+
+td.alarm {
+    color: orange;
+    font-weight: bold;
+    animation: flash 1s infinite;
+    }
+
+@keyframes flash {
+    0%, 100% { background-color: transparent; color: orange; }
+    50% { background-color: orange; color: #000; }
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 2px;
+}
+
+/* Distinct ON button */
+.btn-on {
+    background-color: #2ecc71; /* green */
+}
+
+.btn-on:hover {
+    background-color: #27ae60;
+}
+
+/* Distinct OFF button */
+.btn-off {
+    background-color: #e74c3c; /* red */
+}
+
+.btn-off:hover {
+    background-color: #c0392b;
+}
+
+.btn-on:active,
+.btn-off:active,
+button:active {
+    transform: scale(0.96);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }

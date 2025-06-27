@@ -1,23 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Airport SCADA Panel</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+<meta charset="UTF-8">
+<title>EuroBay Airport Runway Lighting</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<script src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 <body>
-    <div class="panel">
-        <h1>Runway Light Control</h1>
-        <p>Status: 
+<div class="container">
+    <h1>EUROBAY AIRPORT RUNWAY LIGHTING</h1>
+    <table>
+    <thead>
+        <tr>
+        <th>Zone ID</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Manual Override</th>
+        <th>Alarm</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+        <td>RWY-01</td>
+        <td>Runway 01 - East End</td>
         {% if status == "ON" %}
-            <strong id="runway_lights_state" class="status-on">{{ status }}</strong></p>
+            <td class="status-on" id="status-RWY-01">ON</td>
         {% else %}
-            <strong id="runway_lights_state" class="status-off">{{ status }}</strong></p>
+            <td class="status-off" id="status-RWY-01">OFF</td>
         {% endif %}
-        <button onclick="toggleLights('ON')">Turn ON</button>
-        <button onclick="toggleLights('OFF')">Turn OFF</button>
-        <br><br>
-        <a href="/logout">Logout</a>
+        <td>
+            <button class="btn-on" data-zone="RWY-01" onclick="toggleLights('ON')">ON</button>
+            <button class="btn-off" data-zone="RWY-01" onclick="toggleLights('OFF')">OFF</button>
+        </td>
+            <td class="alarm">⚠ Critical Fault: Lights off</td>
+        </tr>
+        <tr>
+        <td>TWY-A</td>
+        <td>Taxiway Alpha</td>
+        <td class="status-on" id="status-TWY-A">ON</td>
+        <td>
+            <button class="btn-on" data-zone="TWY-A">ON</button>
+            <button class="btn-off" data-zone="TWY-A">OFF</button>
+        </td>
+        <td>—</td>
+        </tr>
+        <tr>
+        <td>APRON</td>
+        <td>Apron Lights</td>
+        <td class="status-on" id="status-APRON">ON</td>
+        <td>
+            <button class="btn-on" data-zone="APRON">ON</button>
+            <button class="btn-off" data-zone="APRON">OFF</button>
+        </td>
+        <td>—</td>
+        </tr>
+    </tbody>
+    </table>
+
+    <div class="buttons">
+    <button onclick="location.reload()">🔄 Refresh Panel</button>
+    <button>🛑 Shutdown System</button>
     </div>
+</div>
 </body>
 </html>
