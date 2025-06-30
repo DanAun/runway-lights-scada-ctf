@@ -19,6 +19,7 @@ from flask import Flask, request, jsonify, session
 from threading import Thread
 import time
 from waitress import serve
+from cryptography.fernet import Fernet
 
 import ics.constants
 from govee.govee_control import toggle_team_light
@@ -82,7 +83,8 @@ def is_challenge_solved():
 @app.route('/api/flag', methods=['GET'])
 def give_flag():
     if already_solved:
-        return jsonify({'flag': ics.constants.flag_enc_b64}), 200
+        cipher = Fernet(ics.constants.key_b64)
+        return jsonify({'flag': cipher.decrypt(ics.constants.flag_enc).decode()}), 200
     else:
         return jsonify({'message': 'You have not solved the challenge yet!'}), 403
 

@@ -8,6 +8,5 @@ CHECK_INTERVAL = 0.5 # Interval at which it will check that runwaylight is on, b
 MIN_TEASE_TIME = 10 # Minimal time that lights will be on when 'teasing' the players
 
 # --- CTF FLAG values ---
-key_b64 = 'VnNNyqR4vEqw7G91McgRYJW8Jf38ePDE1Nwo4lGFHUk='
-iv_b64 = 'mJ4BecB9MUpnfwBVDfqN0Q=='
-flag_enc_b64 = 'WDQitjWxi2U+MjaB8w8pX3tOCmybMfIEZKLECufpx+c='
+key_b64 = b'qfmqktY1R0Qch-XJh826jPhvK-OheRXmtDPkvvZTzW4='
+flag_enc = b'gAAAAABoYkToTDf8Tc0Z7mmHS86muc9NgNU5KXuqEgDEt-JEWWrq8amBuK1xq8KAabYkqWaUhGAMN28KjEHxr-G2EBJJCayl5Ima2fqmiIhHPIljahzK1XstuoHTtwqE2Cd8_xhDpj9L'
