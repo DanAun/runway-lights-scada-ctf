@@ -1,0 +1,31 @@
+# Stage 1: Build the application
+FROM python:3.11.2 AS builder
+
+# Set the working directory
+WORKDIR /opt
+
+# Copy the project files into the container
+COPY . .
+
+# Install necessary packages
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Build the ICS binary using PyInstaller
+RUN pyinstaller ics.spec
+
+# Stage 2: Create the final image
+FROM ubuntu:22.04
+
+# Set the working directory
+WORKDIR /opt
+
+# Copy the compiled binary from the builder stage
+COPY --from=builder /opt/dist/ics /opt/ics
+
+# Install necessary runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Command to run the ICS binary
+CMD ["./ics"]

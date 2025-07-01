@@ -12,7 +12,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from flask_limiter import Limiter
 from pymodbus.client import ModbusTcpClient
 import requests
-from ics.constants import ICS_SERVER_PORT, ICS_API_PORT
+from ics.constants import ICS_SERVER_IP, ICS_SERVER_PORT, ICS_API_PORT
 import os
 from waitress import serve
 
@@ -32,8 +32,7 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARN)
 
 
-ICS_SERVER_IP = '127.0.0.1'
-SCADA_WEB_PORT = 8000 # Port of SCADA webUI server ti be started on
+SCADA_WEB_PORT = int(os.getenv("SCADA_WEB_PORT", "8000"))
 COIL_ADDRESS = 0  # Single runway light coil address
 
 def get_light_status():
@@ -140,6 +139,6 @@ def get_status():
 
 if __name__ == '__main__':
     try:
-        serve(app, host='localhost', port=SCADA_WEB_PORT)
+        serve(app, host='0.0.0.0', port=SCADA_WEB_PORT)
     except KeyboardInterrupt:
         log.info("Server shutdown by user")

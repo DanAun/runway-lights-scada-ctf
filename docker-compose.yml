@@ -1,0 +1,36 @@
+services:
+  ics:
+    build:
+      context: .
+      dockerfile: Dockerfile.ics
+    image: ics_image
+    container_name: ics_container
+    ports:
+      - "54321:54321"
+      - "5020:5020"
+    environment:
+      - ICS_SERVER_PORT=5020
+      - ICS_API_PORT=54321
+    networks:
+      - scada-net
+
+  scada:
+    build:
+      context: .
+      dockerfile: Dockerfile.scada
+    image: scada_image
+    container_name: scada_container
+    ports:
+      - "8000:8000"
+      - "23:23"
+    environment:
+      - ICS_SERVER_IP=ics
+      - SCADA_WEB_PORT=8000
+    networks:
+      - scada-net
+    depends_on:
+      - ics
+
+networks:
+  scada-net:
+    driver: bridge

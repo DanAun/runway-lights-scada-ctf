@@ -140,7 +140,7 @@ identity.MajorMinorRevision = "3.0"
 def start_ics_server():
     try:
         log.info("ICS Modbus TCP Server is starting on port %d...", ics.constants.ICS_SERVER_PORT)
-        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("localhost", ics.constants.ICS_SERVER_PORT)}, daemon=True).start()
+        Thread(target=StartTcpServer, args=(context,), kwargs={'identity': identity, 'address': ("0.0.0.0", ics.constants.ICS_SERVER_PORT)}, daemon=True).start()
     except Exception as e:
         log.critical("Failed to start ICS Modbus TCP Server: %s", e)
         
@@ -152,7 +152,7 @@ def start_ics_server():
 
     try:
         log.debug("Running authentication API on port %d" % ics.constants.ICS_API_PORT)
-        serve(app, host='localhost', port=ics.constants.ICS_API_PORT)
+        serve(app, host='0.0.0.0', port=ics.constants.ICS_API_PORT)
     except Exception as e:
         log.critical("Failed to start authentication API on port %d" % ics.constants.ICS_API_PORT)
 

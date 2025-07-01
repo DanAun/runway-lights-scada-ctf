@@ -17,7 +17,7 @@ RETRY_DELAY = 10  # Delay in seconds before retrying connection
 
 def loop_modbus_request():
     # Create a Modbus TCP client
-    client = ModbusTcpClient('localhost', port=ICS_SERVER_PORT)
+    client = ModbusTcpClient('127.0.0.1', port=ICS_SERVER_PORT)
     
     while True:
         try:

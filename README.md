@@ -56,8 +56,7 @@ pyinstaller scada.spec
 pyinstaller malicious.spec
 ```
 
-## Notes
-
-* The SCADA interface requires login and displays live runway status, with the ability to toggle lights ON/OFF.
-* ICS logic may enforce basic rules (e.g., deny invalid state transitions).
-* Status polling ensures the UI reflects the real-time state of the lights.
+3. **Build docker images:**
+```bash
+docker compose up --build
+```
