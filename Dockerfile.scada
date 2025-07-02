@@ -1,37 +1,42 @@
-# Stage 1: Build the application
+# Stage 1: Build Python application
 FROM python:3.11.2 AS builder
 
-# Set the working directory
 WORKDIR /opt
-
-# Copy the project files into the container
 COPY . .
 
-# Install necessary packages
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies and build binaries
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pyinstaller malicious.spec && \
+    pyinstaller scada.spec
 
-# Build the ICS binary using PyInstaller
-RUN pyinstaller malicious.spec
-RUN pyinstaller scada.spec
+# Stage 2: Runtime environment with supervisord and telnet
+FROM ubuntu:24.04
 
-# Use an Ubuntu base image
-FROM ubuntu:22.04
-
-# Set the working directory
 WORKDIR /opt
 
-# Copy the compiled binary from the builder stage
+# Copy binaries from builder
 COPY --from=builder /opt/dist/scada /opt/scada
 COPY --from=builder /opt/dist/malicious /opt/malicious
+COPY supervisord.conf /etc/supervisord.conf
 
-# Install telnet server
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install telnetd, inetd, sudo, openssl, and supervisord
 RUN apt-get update && apt-get install -y --no-install-recommends \
     telnetd \
-    && apt-get clean \
+    openbsd-inetd \
+    sudo \
+    openssl \
+    supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Make the binaries executable
-RUN chmod +x /opt/scada /opt/malicious
+# Create scada user
+RUN useradd -m -s /bin/bash scada && \
+    echo "scada:password" | chpasswd && \
+    usermod -aG sudo scada
 
-# Start the telnet server and run the SCADA binary
-CMD ["./scada"]
+# Enable telnet in inetd.conf
+RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf
+
+# Start everything via supervisord
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]

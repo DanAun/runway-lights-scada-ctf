@@ -10,14 +10,14 @@ log = logging.getLogger("MAL")  # Create a custom logger
 import pymodbus.exceptions
 from pymodbus.client import ModbusTcpClient
 import time
-from ics.constants import ICS_SERVER_PORT
+from ics.constants import ICS_SERVER_PORT, ICS_SERVER_IP
 
 REQUEST_FREQUENCY = 10  # Frequency of requests in seconds
 RETRY_DELAY = 10  # Delay in seconds before retrying connection
 
 def loop_modbus_request():
     # Create a Modbus TCP client
-    client = ModbusTcpClient('127.0.0.1', port=ICS_SERVER_PORT)
+    client = ModbusTcpClient(ICS_SERVER_IP, port=ICS_SERVER_PORT)
     
     while True:
         try:

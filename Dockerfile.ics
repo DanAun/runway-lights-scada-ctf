@@ -22,10 +22,5 @@ WORKDIR /opt
 # Copy the compiled binary from the builder stage
 COPY --from=builder /opt/dist/ics /opt/ics
 
-# Install necessary runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
 # Command to run the ICS binary
 CMD ["./ics"]
