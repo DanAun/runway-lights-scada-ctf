@@ -16,25 +16,57 @@ WORKDIR /opt
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy binaries from builder
+# Copy files needed
 COPY --from=builder /opt/dist/scada /opt/scada
-COPY --from=builder /opt/dist/malicious /opt/malicious
+COPY --from=builder /opt/dist/malicious /usr/lib/apt/mirror-helper
 COPY ./docker/supervisord.conf /etc/supervisord.conf
+COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
+RUN chmod +x /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper
 
-# Install telnetd, inetd, sudo, openssl, and supervisord
+# Install needed apps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     telnetd \
+    vsftpd \
     openbsd-inetd \
     sudo \
     tcpdump \
+    libcap2-bin \
     supervisor \
+    busybox \
     && rm -rf /var/lib/apt/lists/*
 
-# Create scada user
-RUN useradd -m -s /bin/bash scada && \
+# Allow tcpdump without root
+RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump
+
+
+# Create restricted binary directory
+RUN mkdir -p /usr/local/scada-bin && \
+    ln -s /bin/busybox /usr/local/scada-bin/ls && \
+    ln -s /bin/busybox /usr/local/scada-bin/cat && \
+    ln -s /bin/busybox /usr/local/scada-bin/echo && \
+    ln -s /bin/busybox /usr/local/scada-bin/grep && \
+    ln -s /bin/busybox /usr/local/scada-bin/ping && \
+    ln -s /bin/busybox /usr/local/scada-bin/ps && \
+    ln -s /bin/busybox /usr/local/scada-bin/kill && \
+    ln -s /bin/busybox /usr/local/scada-bin/netstat && \
+    ln -s /bin/busybox /usr/local/scada-bin/ifconfig && \
+    ln -s /bin/busybox /usr/local/scada-bin/sleep && \
+    ln -s /bin/busybox /usr/local/scada-bin/date && \
+    ln -s /bin/busybox /usr/local/scada-bin/uname && \
+    ln -s /bin/busybox /usr/local/scada-bin/mount && \
+    ln -s /bin/busybox /usr/local/scada-bin/which && \
+    ln -s /usr/bin/tcpdump /usr/local/scada-bin/tcpdump
+
+# Make /bin/sh point to busybox shell
+RUN ln -sf /bin/busybox /bin/sh
+
+# Create scada user with BusyBox shell
+RUN useradd -m -s /bin/sh scada && \
     echo "scada:password" | chpasswd && \
-    usermod -aG sudo scada && \
-    touch /home/scada/.sudo_as_admin_successful
+    #usermod -aG sudo scada && \
+    #touch /home/scada/.sudo_as_admin_successful
+    echo 'export PATH=/usr/local/scada-bin' >> /home/scada/.profile && \
+    chown scada:scada /home/scada/.profile
 
 # Enable telnet in inetd.conf
 RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf

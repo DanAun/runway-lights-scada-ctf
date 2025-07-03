@@ -14,6 +14,9 @@ services:
       - ICS_API_PORT=54321
     networks:
       - scada-net
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
 
   scada:
     hostname: eurobay-scada
