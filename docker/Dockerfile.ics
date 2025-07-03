@@ -14,13 +14,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN pyinstaller ics.spec
 
 # Stage 2: Create the final image
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
-# Set the working directory
-WORKDIR /opt
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Copy the compiled binary from the builder stage
-COPY --from=builder /opt/dist/ics /opt/ics
+COPY --from=builder /opt/dist/ics ./ics
+
+RUN chmod +x ./ics
 
 # Command to run the ICS binary
-CMD ["./ics"]
+ENTRYPOINT ["./ics"]

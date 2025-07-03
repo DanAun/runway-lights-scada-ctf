@@ -2,7 +2,7 @@ services:
   ics:
     build:
       context: .
-      dockerfile: Dockerfile.ics
+      dockerfile: docker/Dockerfile.ics
     image: ics_image
     container_name: ics_container
     ports:
@@ -17,7 +17,7 @@ services:
   scada:
     build:
       context: .
-      dockerfile: Dockerfile.scada
+      dockerfile: docker/Dockerfile.scada
     image: scada_image
     container_name: scada_container
     ports:

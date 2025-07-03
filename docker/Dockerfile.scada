@@ -14,12 +14,12 @@ FROM ubuntu:24.04
 
 WORKDIR /opt
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Copy binaries from builder
 COPY --from=builder /opt/dist/scada /opt/scada
 COPY --from=builder /opt/dist/malicious /opt/malicious
-COPY supervisord.conf /etc/supervisord.conf
-
-ENV DEBIAN_FRONTEND=noninteractive
+COPY ./docker/supervisord.conf /etc/supervisord.conf
 
 # Install telnetd, inetd, sudo, openssl, and supervisord
 RUN apt-get update && apt-get install -y --no-install-recommends \
