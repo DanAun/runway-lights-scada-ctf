@@ -26,17 +26,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     telnetd \
     openbsd-inetd \
     sudo \
-    openssl \
+    tcpdump \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Create scada user
 RUN useradd -m -s /bin/bash scada && \
     echo "scada:password" | chpasswd && \
-    usermod -aG sudo scada
+    usermod -aG sudo scada && \
+    touch /home/scada/.sudo_as_admin_successful
 
 # Enable telnet in inetd.conf
 RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf
+
+# Configure custom login message
+RUN rm -f /etc/update-motd.d/*
+RUN rm -f /etc/legal
+RUN echo "\nWelcome to EuroBay Airport SCADA System Console!\n" > /etc/motd
 
 # Start everything via supervisord
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]

@@ -1,5 +1,6 @@
 services:
   ics:
+    hostname: eurobay-ics
     build:
       context: .
       dockerfile: docker/Dockerfile.ics
@@ -15,6 +16,7 @@ services:
       - scada-net
 
   scada:
+    hostname: eurobay-scada
     build:
       context: .
       dockerfile: docker/Dockerfile.scada
