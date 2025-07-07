@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile.ics
     image: ics_image
-    container_name: ics_container
+    container_name: ics
     ports:
       - "54321:54321"
       - "502:502"
@@ -13,10 +13,7 @@ services:
       - ICS_SERVER_PORT=502
       - ICS_API_PORT=54321
     networks:
-      - scada-net
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
+      - internal-net
 
   scada:
     hostname: eurobay-scada
@@ -24,19 +21,24 @@ services:
       context: .
       dockerfile: docker/Dockerfile.scada
     image: scada_image
-    container_name: scada_container
+    container_name: scada
     ports:
       - "8000:8000"
       - "23:23"
+      - "21:21"
+      - "30000-30009:30000-30009"
     environment:
       - ICS_SERVER_PORT=502
       - ICS_SERVER_IP=ics
       - SCADA_WEB_PORT=8000
     networks:
-      - scada-net
+      - internal-net
     depends_on:
       - ics
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
 
 networks:
-  scada-net:
+  internal-net:
     driver: bridge

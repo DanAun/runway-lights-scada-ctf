@@ -58,5 +58,5 @@ pyinstaller malicious.spec
 
 3. **Build docker images:**
 ```bash
-docker compose up --build
+docker compose -p eurobay-international up --build
 ```

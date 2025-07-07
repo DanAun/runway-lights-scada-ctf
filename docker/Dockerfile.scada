@@ -1,5 +1,37 @@
-# Stage 1: Build Python application
-FROM python:3.11.2 AS builder
+# Stage 1: Builder - Ubuntu to build BusyBox 1.37.0
+FROM ubuntu:24.04 AS busybox-builder
+
+RUN apt-get update && apt-get install -y \
+    build-essential wget bc
+
+WORKDIR /tmp
+
+RUN wget https://busybox.net/downloads/busybox-1.37.0.tar.bz2 && \
+    tar xjf busybox-1.37.0.tar.bz2
+
+WORKDIR /tmp/busybox-1.37.0
+
+# Configure busybox commands
+RUN make allnoconfig && \
+    sed -i 's/# CONFIG_LS is not set/CONFIG_LS=y/' .config && \
+    sed -i 's/# CONFIG_CAT is not set/CONFIG_CAT=y/' .config && \
+    sed -i 's/# CONFIG_ECHO is not set/CONFIG_ECHO=y/' .config && \
+    sed -i 's/# CONFIG_GREP is not set/CONFIG_GREP=y/' .config && \
+    sed -i 's/# CONFIG_SLEEP is not set/CONFIG_SLEEP=y/' .config && \
+    sed -i 's/# CONFIG_SORT is not set/CONFIG_SORT=y/' .config && \
+    sed -i 's/# CONFIG_DATE is not set/CONFIG_DATE=y/' .config && \
+    sed -i 's/# CONFIG_UNAME is not set/CONFIG_UNAME=y/' .config && \
+    sed -i 's/# CONFIG_DMESG is not set/CONFIG_DMESG=y/' .config && \
+    sed -i 's/# CONFIG_TRACEROUTE is not set/CONFIG_TRACEROUTE=y/' .config && \
+    sed -i 's/# CONFIG_TELNET is not set/CONFIG_TELNET=y/' .config && \
+    sed -i 's/# CONFIG_PING is not set/CONFIG_PING=y/' .config && \
+    sed -i 's/# CONFIG_NETSTAT is not set/CONFIG_NETSTAT=y/' .config && \
+    sed -i 's/# CONFIG_PS is not set/CONFIG_PS=y/' .config && \
+    sed -i 's/# CONFIG_KILL is not set/CONFIG_KILL=y/' .config && \
+    make -j$(nproc)
+
+# Stage 2: Build Python application
+FROM python:3.11.2 AS python-builder
 
 WORKDIR /opt
 COPY . .
@@ -16,13 +48,6 @@ WORKDIR /opt
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Copy files needed
-COPY --from=builder /opt/dist/scada /opt/scada
-COPY --from=builder /opt/dist/malicious /usr/lib/apt/mirror-helper
-COPY ./docker/supervisord.conf /etc/supervisord.conf
-COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
-RUN chmod +x /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper
-
 # Install needed apps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     telnetd \
@@ -32,49 +57,66 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tcpdump \
     libcap2-bin \
     supervisor \
-    busybox \
     && rm -rf /var/lib/apt/lists/*
 
 # Allow tcpdump without root
 RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump
 
+# Copy files needed
+COPY --from=python-builder /opt/dist/scada /opt/scada
+COPY --from=python-builder /opt/dist/malicious /usr/lib/apt/mirror-helper
+COPY ./docker/supervisord.conf /etc/supervisord.conf
+COPY ./docker/vsftpd.conf /etc/vsftpd.conf
+COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
+#COPY ./docker/tcpdump-wrapper.sh /usr/local/scada-bin/tcpdump
+COPY --from=busybox-builder /tmp/busybox-1.37.0/busybox /bin/busybox
+RUN chmod +x /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /bin/busybox
 
 # Create restricted binary directory
 RUN mkdir -p /usr/local/scada-bin && \
-    ln -s /bin/busybox /usr/local/scada-bin/ls && \
-    ln -s /bin/busybox /usr/local/scada-bin/cat && \
-    ln -s /bin/busybox /usr/local/scada-bin/echo && \
-    ln -s /bin/busybox /usr/local/scada-bin/grep && \
-    ln -s /bin/busybox /usr/local/scada-bin/ping && \
-    ln -s /bin/busybox /usr/local/scada-bin/ps && \
-    ln -s /bin/busybox /usr/local/scada-bin/kill && \
-    ln -s /bin/busybox /usr/local/scada-bin/netstat && \
-    ln -s /bin/busybox /usr/local/scada-bin/ifconfig && \
-    ln -s /bin/busybox /usr/local/scada-bin/sleep && \
-    ln -s /bin/busybox /usr/local/scada-bin/date && \
-    ln -s /bin/busybox /usr/local/scada-bin/uname && \
-    ln -s /bin/busybox /usr/local/scada-bin/mount && \
-    ln -s /bin/busybox /usr/local/scada-bin/which && \
-    ln -s /usr/bin/tcpdump /usr/local/scada-bin/tcpdump
-
-# Make /bin/sh point to busybox shell
-RUN ln -sf /bin/busybox /bin/sh
+    # Make /bin/sh point to busybox shell
+    ln -sf /bin/busybox /bin/sh && \
+    ln -sf /bin/busybox /usr/local/scada-bin/ls && \
+    ln -sf /bin/busybox /usr/local/scada-bin/cat && \
+    ln -sf /bin/busybox /usr/local/scada-bin/echo && \
+    ln -sf /bin/busybox /usr/local/scada-bin/grep && \
+    ln -sf /bin/busybox /usr/local/scada-bin/sleep && \
+    ln -sf /bin/busybox /usr/local/scada-bin/sort && \
+    ln -sf /bin/busybox /usr/local/scada-bin/date && \
+    ln -sf /bin/busybox /usr/local/scada-bin/uname && \
+    ln -sf /bin/busybox /usr/local/scada-bin/dmesg && \
+    ln -sf /bin/busybox /usr/local/scada-bin/traceroute && \
+    ln -sf /bin/busybox /usr/local/scada-bin/telnet && \
+    ln -sf /bin/busybox /usr/local/scada-bin/ping && \
+    ln -sf /bin/busybox /usr/local/scada-bin/netstat && \
+    ln -sf /bin/busybox /usr/local/scada-bin/ps && \
+    ln -sf /bin/busybox /usr/local/scada-bin/kill && \
+    # Add tcpdump to path
+    ln -sf /usr/bin/tcpdump /usr/local/scada-bin/tcpdump && \
+    # Setup 'command' and 'help' commands
+    echo '#!/bin/sh' > /usr/local/scada-bin/help && \
+    echo 'echo "Available commands:\n"' >> /usr/local/scada-bin/help && \
+    echo 'ls /usr/local/scada-bin | sort' >> /usr/local/scada-bin/help && \
+    chmod +x /usr/local/scada-bin/help && \
+    ln -s /usr/local/scada-bin/help /usr/local/scada-bin/commands
 
 # Create scada user with BusyBox shell
 RUN useradd -m -s /bin/sh scada && \
     echo "scada:password" | chpasswd && \
-    #usermod -aG sudo scada && \
-    #touch /home/scada/.sudo_as_admin_successful
     echo 'export PATH=/usr/local/scada-bin' >> /home/scada/.profile && \
     chown scada:scada /home/scada/.profile
 
 # Enable telnet in inetd.conf
 RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf
 
+# Initialise ftp
+RUN mkdir -p /var/run/vsftpd/empty && chmod 755 /var/run/vsftpd/empty
+
+
 # Configure custom login message
 RUN rm -f /etc/update-motd.d/*
 RUN rm -f /etc/legal
-RUN echo "\nWelcome to EuroBay Airport SCADA System Console!\n" > /etc/motd
+RUN echo "Welcome to EuroBay Airport SCADA System Console!" > /etc/motd
 
 # Start everything via supervisord
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
