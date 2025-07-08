@@ -100,8 +100,7 @@ RUN mkdir -p /usr/local/scada-bin && \
 RUN useradd -m -s /bin/sh scada && \
     echo "scada:password" | chpasswd && \
     echo 'export PATH=/usr/local/scada-bin' >> /home/scada/.profile && \
-    chown scada:scada /home/scada/.profile && \
-    chown scada:scada /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper
+    chown scada:scada /home/scada/.profile
 
 # Configure custom login message
 RUN rm -f /etc/update-motd.d/*
@@ -116,7 +115,8 @@ COPY ./docker/supervisord.conf /etc/supervisord.conf
 COPY ./docker/vsftpd.conf /etc/vsftpd.conf
 COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
 COPY ./docker/guardian-watchdog.sh /home/scada/.local/.bin/dbus-update
-RUN chmod +rx /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /home/scada/.local/.bin/dbus-update
+RUN chmod +rx /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /home/scada/.local/.bin/dbus-update /opt/scada && \
+    chown scada:scada /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /home/scada/.local/.bin/dbus-update /opt/scada
 
 # Start everything via supervisord
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
