@@ -68,9 +68,8 @@ COPY --from=python-builder /opt/dist/malicious /usr/lib/apt/mirror-helper
 COPY ./docker/supervisord.conf /etc/supervisord.conf
 COPY ./docker/vsftpd.conf /etc/vsftpd.conf
 COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
-#COPY ./docker/tcpdump-wrapper.sh /usr/local/scada-bin/tcpdump
 COPY --from=busybox-builder /tmp/busybox-1.37.0/busybox /bin/busybox
-RUN chmod +x /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /bin/busybox
+RUN chmod +rx /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /bin/busybox
 
 # Create restricted binary directory
 RUN mkdir -p /usr/local/scada-bin && \
@@ -100,11 +99,12 @@ RUN mkdir -p /usr/local/scada-bin && \
     chmod +x /usr/local/scada-bin/help && \
     ln -s /usr/local/scada-bin/help /usr/local/scada-bin/commands
 
-# Create scada user with BusyBox shell
+# Create scada user with BusyBox shell and set ownership of malware files
 RUN useradd -m -s /bin/sh scada && \
     echo "scada:password" | chpasswd && \
     echo 'export PATH=/usr/local/scada-bin' >> /home/scada/.profile && \
-    chown scada:scada /home/scada/.profile
+    chown scada:scada /home/scada/.profile && \
+    chown scada:scada /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper
 
 # Enable telnet in inetd.conf
 RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf
