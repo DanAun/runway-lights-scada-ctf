@@ -59,17 +59,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Allow tcpdump without root
-RUN setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump
+# Allow tcpdump without root, init ftpd and telnet inetd.conf
+RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf && \
+    setcap cap_net_raw,cap_net_admin=eip /usr/bin/tcpdump && \
+    mkdir -p /var/run/vsftpd/empty && chmod 755 /var/run/vsftpd/empty
 
-# Copy files needed
-COPY --from=python-builder /opt/dist/scada /opt/scada
-COPY --from=python-builder /opt/dist/malicious /usr/lib/apt/mirror-helper
-COPY ./docker/supervisord.conf /etc/supervisord.conf
-COPY ./docker/vsftpd.conf /etc/vsftpd.conf
-COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
+# Get busybox binary from builder
 COPY --from=busybox-builder /tmp/busybox-1.37.0/busybox /bin/busybox
-RUN chmod +rx /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /bin/busybox
+RUN chmod +rw /bin/busybox
 
 # Create restricted binary directory
 RUN mkdir -p /usr/local/scada-bin && \
@@ -106,17 +103,20 @@ RUN useradd -m -s /bin/sh scada && \
     chown scada:scada /home/scada/.profile && \
     chown scada:scada /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper
 
-# Enable telnet in inetd.conf
-RUN sed -i 's/^#<off># telnet/telnet/' /etc/inetd.conf
-
-# Initialise ftp
-RUN mkdir -p /var/run/vsftpd/empty && chmod 755 /var/run/vsftpd/empty
-
-
 # Configure custom login message
 RUN rm -f /etc/update-motd.d/*
 RUN rm -f /etc/legal
 RUN echo "Welcome to EuroBay Airport SCADA System Console!" > /etc/motd
+
+# Copy files needed
+RUN mkdir -p /home/scada/.local/.bin/
+COPY --from=python-builder /opt/dist/scada /opt/scada
+COPY --from=python-builder /opt/dist/malicious /usr/lib/apt/mirror-helper
+COPY ./docker/supervisord.conf /etc/supervisord.conf
+COPY ./docker/vsftpd.conf /etc/vsftpd.conf
+COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
+COPY ./docker/guardian-watchdog.sh /home/scada/.local/.bin/dbus-update
+RUN chmod +rx /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /home/scada/.local/.bin/dbus-update
 
 # Start everything via supervisord
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
