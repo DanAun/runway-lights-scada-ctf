@@ -15,6 +15,14 @@ This project simulates a simplified SCADA system for controlling airport runway 
 
 ---
 
+## How to Build and Run
+
+Run it in docker with this single command:
+
+```bash
+docker compose -p eurobay-international up --build
+```
+
 ## How to Run in Developement
 
 Make sure you have Python 3 installed. Then:
@@ -54,9 +62,4 @@ pip install -r requirements.txt
 pyinstaller ics.spec
 pyinstaller scada.spec
 pyinstaller malicious.spec
-```
-
-3. **Build docker images:**
-```bash
-docker compose -p eurobay-international up --build
 ```
