@@ -107,7 +107,7 @@ RUN useradd -m -s /bin/sh scada && \
 # Configure custom login message
 RUN rm -f /etc/update-motd.d/*
 RUN rm -f /etc/legal
-RUN echo "Welcome to EuroBay Airport SCADA System Console!" > /etc/motd
+RUN echo "Welcome to EuroBay Airport SCADA System Console! Type help for a list of commands." > /etc/motd
 
 # Copy files needed
 RUN mkdir -p /home/scada/.local/.bin/
