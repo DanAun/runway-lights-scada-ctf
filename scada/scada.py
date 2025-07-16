@@ -68,8 +68,6 @@ def home():
         return redirect(url_for('login'))
 
     status = get_status()
-    #status = "ECTL{{eifjw0ifjwo0}}"
-
     return render_template('index.html', status=status)
 
 @app.route('/login', methods=['GET', 'POST'])
