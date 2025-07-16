@@ -32,7 +32,8 @@ services:
       - ICS_SERVER_IP=ics
       - SCADA_WEB_PORT=8000
     networks:
-      - internal-net
+      internal-net:
+        ipv4_address: 192.168.1.20
     depends_on:
       - ics
     cap_add:
@@ -42,3 +43,6 @@ services:
 networks:
   internal-net:
     driver: bridge
+    ipam:
+      config:
+      - subnet: 192.168.1.0/24
