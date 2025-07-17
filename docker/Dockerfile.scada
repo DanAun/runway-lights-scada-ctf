@@ -27,6 +27,7 @@ RUN make allnoconfig && \
     sed -i 's/# CONFIG_PING is not set/CONFIG_PING=y/' .config && \
     sed -i 's/# CONFIG_PS is not set/CONFIG_PS=y/' .config && \
     sed -i 's/# CONFIG_KILL is not set/CONFIG_KILL=y/' .config && \
+    sed -i 's/# CONFIG_RM is not set/CONFIG_RM=y/' .config && \
     make -j$(nproc)
 
 # Stage 2: Build Python application
@@ -88,6 +89,7 @@ RUN mkdir -p /usr/local/scada-bin && \
     ln -sf /bin/busybox /usr/local/scada-bin/netstat && \
     ln -sf /bin/busybox /usr/local/scada-bin/ps && \
     ln -sf /bin/busybox /usr/local/scada-bin/kill && \
+    ln -sf /bin/busybox /usr/local/scada-bin/rm && \
     # Add tcpdump and netstat to path
     ln -sf /usr/bin/tcpdump /usr/local/scada-bin/tcpdump && \
     ln -sf /usr/bin/netstat /usr/local/scada-bin/netstat && \
