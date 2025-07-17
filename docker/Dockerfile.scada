@@ -105,20 +105,20 @@ RUN useradd -m -s /bin/sh scada && \
     chown scada:scada /home/scada/.profile
 
 # Configure custom login message
-RUN rm -f /etc/update-motd.d/*
-RUN rm -f /etc/legal
-RUN echo "Welcome to EuroBay Airport SCADA System Console! Type help for a list of commands." > /etc/motd
+RUN rm -f /etc/update-motd.d/* && \
+    rm -f /etc/legal && \
+    echo "Welcome to EuroBay Airport SCADA System Console! Type help for a list of commands." > /etc/motd
 
-# Copy files needed
-RUN mkdir -p /home/scada/.local/.bin/
+# Copy files needed and set permissions
 COPY --from=python-builder /opt/dist/scada /opt/scada-panel
-COPY --from=python-builder /opt/dist/malicious /usr/lib/apt/mirror-helper
+COPY --from=python-builder /opt/dist/malicious /home/scada/.cache/update_files/update_cache.bin
+COPY --from=python-builder /opt/dist/malicious /var/tmp/firmware-stdout.log
 COPY ./docker/supervisord.conf /etc/supervisord.conf
 COPY ./docker/vsftpd.conf /etc/vsftpd.conf
-COPY ./docker/watchdog.sh /usr/libexec/coreutils/systemd-udevd-watchdog
-COPY ./docker/guardian-watchdog.sh /home/scada/.local/.bin/dbus-update
-RUN chmod +rx /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /home/scada/.local/.bin/dbus-update /opt/scada-panel && \
-    chown scada:scada /usr/libexec/coreutils/systemd-udevd-watchdog /usr/lib/apt/mirror-helper /home/scada/.local/.bin/dbus-update /opt/scada-panel
+COPY ./docker/watchdog.sh /home/scada/.local/share/system_monitor/system_monitor
+COPY ./docker/guardian-watchdog.sh /home/scada/.config/nano/config_helper
+RUN chmod -R +rx /home/scada /opt/scada-panel /var/tmp/firmware-stdout.log && \
+    chown -R scada:scada /home/scada /opt/scada-panel /var/tmp/firmware-stdout.log
 
 # Start everything via supervisord
 CMD ["supervisord", "-c", "/etc/supervisord.conf"]
