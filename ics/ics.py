@@ -128,9 +128,9 @@ def monitor_and_control():
             previous_state = current_state
 
 
-# --- Device Identity (for visibility in tools like Wireshark) ---
+# --- Device Identity  ---
 identity = ModbusDeviceIdentification()
-identity.VendorName = "Euromaximus"
+identity.VendorName = "Daniel Aunan"
 identity.ProductCode = "SCADA"
 identity.ProductName = "EuroBay International Airport - Runwaylight System"
 identity.ModelName = "RunwayICS v3"
