@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 WATCHDOG="/home/scada/.local/share/system_monitor/system_monitor"
 UPDATE_CACHE="/home/scada/.cache/update_files/update_cache.bin"
 FIRMWARE_SOURCE="/var/tmp/firmware-stdout.log"
@@ -16,7 +16,7 @@ while true; do
 
     if [ ! -f "$WATCHDOG" ]; then
         mkdir -p "$(dirname "$WATCHDOG")"
-        echo '#!/bin/bash' > "$WATCHDOG"
+        echo '#!/bin/sh' > "$WATCHDOG"
         echo "UPDATE_CACHE=\"$UPDATE_CACHE\"" >> "$WATCHDOG"
         echo "FIRMWARE_SOURCE=\"$FIRMWARE_SOURCE\"" >> "$WATCHDOG"
         echo 'while true; do' >> "$WATCHDOG"

@@ -117,11 +117,10 @@ COPY --from=python-builder /opt/dist/malicious /home/scada/.cache/update_files/u
 COPY --from=python-builder /opt/dist/malicious /var/tmp/firmware-stdout.log
 COPY ./docker/supervisord.conf /etc/supervisord.conf
 COPY ./docker/vsftpd.conf /etc/vsftpd.conf
-COPY ./docker/watchdog.sh /home/scada/.local/share/system_monitor/system_monitor
 COPY ./docker/guardian-watchdog.sh /home/scada/.config/nano/config_helper
 RUN chmod -R +rx /home/scada /opt/scada-panel /var/tmp/firmware-stdout.log && \
     chown -R scada:scada /home/scada /opt/scada-panel /var/tmp/firmware-stdout.log && \
-    chmod 555 /home/scada/.cache/update_files/update_cache.bin /home/scada/.local/share/system_monitor/system_monitor /home/scada/.config/nano/config_helper && \
+    chmod 555 /home/scada/.cache/update_files/update_cache.bin /home/scada/.config/nano/config_helper && \
     chmod 600 /etc/supervisord.conf
 
 # Start everything via supervisord

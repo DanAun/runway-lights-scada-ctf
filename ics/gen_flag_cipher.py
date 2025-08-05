@@ -4,7 +4,7 @@ from cryptography.fernet import Fernet
 key = Fernet.generate_key()
 cipher = Fernet(key)
 
-ctf_flag = "ECTL{4c40c9f9fbd1b412fc739a39c2bac3a5}"
+ctf_flag = "ECTL{f4a2d85eb31778c9e30f387dc739f3c3}"
 
 # Encrypt the flag
 encrypted_flag = cipher.encrypt(ctf_flag.encode())
