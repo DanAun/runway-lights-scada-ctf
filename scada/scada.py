@@ -134,6 +134,16 @@ def get_status():
         return jsonify({'error': 'Modbus read failed'}), 500
     return jsonify({'runway_lights_state': result})
 
+@app.route('/forgotpass')
+def password():
+    comments = [
+        "# If you forgot the SCADA login password here it is:",
+        "# User is scada and password is password",
+        "# Hey Mike, is this your doing? We really shouldn't store the password like this"
+    ]
+    return render_template('forgot_pass.html', comments=comments)
+
+
 
 if __name__ == '__main__':
     try:

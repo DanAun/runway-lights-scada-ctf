@@ -22,7 +22,7 @@ def main():
     
     # Test each LED strip
     for i in range(1,gc.MAX_TEAM_NUM+1):
-        gc.toggle_team_light(i)
+        gc.toggle_team_light(i, True)
         log.info("Light for team %d activated. Please check if it is lit up.", i)
         time.sleep(0.5)
 
