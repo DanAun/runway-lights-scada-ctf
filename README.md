@@ -1,6 +1,16 @@
 # Runway Lights SCADA CTF
 
-This project simulates a simplified SCADA system for controlling airport runway lights using Modbus TCP. It is divided into three components:
+This is a CTF challenge simulating a simplified SCADA system for controlling airport runway lights.
+
+## How to Play
+
+Create an empty .env file in root directory then run it in docker with this single command:
+
+```bash
+docker compose -p eurobay-international up --build
+```
+## Spoilers below!
+The code is divided into three components:
 
 ## Components
 
@@ -14,14 +24,6 @@ This project simulates a simplified SCADA system for controlling airport runway 
    This folder contains code for a simple process that continuously sends a power-off signal to the runway lights. The goal of the CTF challenge should be to identify and shut down this process.
 
 ---
-
-## How to Build and Run
-
-Run it in docker with this single command:
-
-```bash
-docker compose -p eurobay-international up --build
-```
 
 ## How to Run in Developement
 
